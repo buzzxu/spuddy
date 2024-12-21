@@ -1,2 +1,2 @@
 # shy-dog
-web toolkit
+Simple, Reliable, Just like a potato
