@@ -1,0 +1,17 @@
+
+redis:
+  url: 47.100.7.136:10379
+  password: MNBV7QCvX9YX&UK8xu #MNBV7QCvX9YX&UK8
+  database: 15
+  pool:
+    min-idle: 500
+    max-idle: 2000
+    max-total: 2000
+    max-wait: 5000
+
+db:
+  connection:
+    username: jd_devel
+    password: Nq%nUX8sZysv#b267FWz
+    url: jdbc:postgresql://pgm-uf6713x8gfi411gdio.pg.rds.aliyuncs.com:5432/jt
+    driver-class-name: org.postgresql.Driver

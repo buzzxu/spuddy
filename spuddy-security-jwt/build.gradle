@@ -1,0 +1,9 @@
+dependencies {
+    api project(":spuddy-security-base")
+
+    api("com.auth0:java-jwt:$jwtVersion"){
+        exclude(group:"com.fasterxml.jackson.core")
+    }
+    compileOnly("jakarta.servlet:jakarta.servlet-api:$servletVersion")
+
+}

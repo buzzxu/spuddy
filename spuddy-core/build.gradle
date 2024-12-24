@@ -1,0 +1,10 @@
+dependencies {
+    api(project(":spuddy-commons"))
+
+    api("org.springframework:spring-context-support")
+
+    api 'jakarta.annotation:jakarta.annotation-api:3.0.0'
+    compileOnly('org.springframework.boot:spring-boot')
+
+
+}

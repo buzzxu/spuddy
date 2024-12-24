@@ -1,0 +1,18 @@
+dependencies {
+    api project(":spuddy-db")
+
+    api platform("org.jdbi:jdbi3-bom:${jdbiVersion}")
+    api ("org.jdbi:jdbi3-core"){
+        exclude (module:"caffeine")
+    }
+    api("org.jdbi:jdbi3-jackson2")
+    api("org.jdbi:jdbi3-guava"){
+        exclude (module:"guava")
+    }
+    api("org.jdbi:jdbi3-sqlobject")
+    api("org.jdbi:jdbi3-caffeine-cache")
+
+    testImplementation ("org.springframework:spring-test")
+    testImplementation ("org.postgresql:postgresql:$postgresqlVersion")
+    testImplementation "com.zaxxer:HikariCP:$hikariCPVersion"
+}

@@ -1,0 +1,20 @@
+rootProject.name = 'spuddy'
+rootProject.children.each { project ->
+    project.buildFileName = "build.gradle"
+    assert project.projectDir.isDirectory()
+    assert project.buildFile.exists()
+    assert project.buildFile.isFile()
+}
+
+include 'spuddy-bom'
+include 'spuddy-objects'
+include 'spuddy-db'
+include 'spuddy-core'
+include 'spuddy-commons'
+include 'spuddy-dal-jdbi'
+include 'spuddy-security-base'
+include 'spuddy-redis'
+include 'spuddy-security-jwt'
+include 'spuddy-secutiry-simple-jwt'
+include 'spuddy-spring-boot'
+

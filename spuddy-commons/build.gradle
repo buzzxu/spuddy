@@ -1,0 +1,37 @@
+dependencies {
+    api(project(":spuddy-objects"))
+
+    api("org.springframework:spring-context")
+
+    api("org.apache.commons:commons-lang3:${lang3Version}")
+    api("org.apache.commons:commons-pool2:$pool2Version")
+    api("org.apache.commons:commons-text:${textVersion}")
+    api 'commons-codec:commons-codec:1.17.1'
+
+    api("com.google.guava:guava")
+    api "com.github.ben-manes.caffeine:caffeine:${caffeineVersion}"
+
+    api("com.fasterxml.jackson.core:jackson-annotations")
+    api("com.fasterxml.jackson.core:jackson-core")
+    api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml"){
+        exclude(module: 'snakeyaml')
+    }
+    api("com.fasterxml.jackson.datatype:jackson-datatype-guava")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+    api("com.fasterxml.jackson.module:jackson-module-parameter-names")
+    api("com.fasterxml.jackson.module:jackson-module-afterburner")
+
+    api("org.owasp.encoder:encoder:$owaspEncoderVersion")
+
+    api 'org.javassist:javassist:3.30.2-GA'
+    //http
+    api("com.squareup.okhttp3:okhttp:$okhttpVersion")
+
+    api('org.reflections:reflections:0.10.2'){
+        exclude(module:'javassist')
+    }
+    api "org.mindrot:jbcrypt:0.4"
+
+    api('com.google.re2j:re2j:1.7')
+}

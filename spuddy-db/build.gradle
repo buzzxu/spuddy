@@ -1,0 +1,9 @@
+dependencies {
+    api project(":spuddy-core")
+    api("org.springframework:spring-tx")
+    api("org.springframework:spring-jdbc")
+
+    api("com.zaxxer:HikariCP:$hikariCPVersion"){
+        exclude(module:'slf4j-api')
+    }
+}

@@ -1,0 +1,10 @@
+dependencies {
+
+    api project(":spuddy-core")
+    api('org.springframework.boot:spring-boot')
+    api("redis.clients:jedis:$jedisVersion"){
+        exclude(module:"commons-pool2")
+    }
+    api("com.github.jedis-lock:jedis-lock:1.0.0")
+
+}

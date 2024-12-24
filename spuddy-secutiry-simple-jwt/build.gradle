@@ -1,0 +1,6 @@
+dependencies {
+    api project(":spuddy-security-jwt")
+
+    compileOnly("jakarta.servlet:jakarta.servlet-api:$servletVersion")
+
+}

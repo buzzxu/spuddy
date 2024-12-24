@@ -1,0 +1,411 @@
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven {
+            url 'https://repo.huaweicloud.com/repository/maven/'
+        }
+        maven {
+            url "https://maven.aliyun.com/repository/gradle-plugin"
+        }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+        mavenLocal()
+
+    }
+
+
+    dependencies {
+        classpath "com.guardsquare:proguard-gradle:7.5.0"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+}
+
+wrapper {
+    gradleVersion = '8.10'
+    distributionType = Wrapper.DistributionType.BIN
+}
+def buildTimeAndDate = OffsetDateTime.now()
+
+ext{
+    buildDate = DateTimeFormatter.ISO_LOCAL_DATE.format(buildTimeAndDate)
+    buildTime = DateTimeFormatter.ofPattern('HH:mm:ss.SSSZ').format(buildTimeAndDate)
+}
+
+repositories {
+    mavenCentral()
+}
+
+allprojects {
+    group "$group"
+    version "$projectVersion"
+
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'idea'
+
+    idea{
+        module {
+            outputDir file('target/classes/main')
+            testOutputDir file('target/classes/test')
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven/'}
+        maven { url 'https://maven.repository.redhat.com/ga/'}
+        mavenLocal()
+    }
+}
+
+subprojects { subProject->
+    defaultTasks 'build'
+    if ( subProject.name.startsWith( 'release' ) || subProject.name.startsWith( 'documentation' ) ) {
+        return
+    }
+
+    configurations{
+        provided {
+            description = 'Non-exported compile-time dependencies.'
+        }
+
+        compile.exclude group:'ch.qos.logback'
+        compile.exclude group:'commons-logging'
+        compile.exclude group:'javax.annotation',module:"javax.annotation-api"
+        compile.exclude group:'javax.inject',module:"javax.inject"
+        compile.exclude group:'javax.ws.rs',module: "jsr311-api"
+        compile.exclude group:'javax.xml.bind',module:"jaxb-api"
+        testCompile.exclude group:'commons-logging'
+        testCompile.exclude group:'ch.qos.logback'
+        testCompile.extendsFrom compileOnly
+    }
+
+    dependencies {
+        api platform("org.junit:junit-bom:${junitVersion}")
+        api platform("com.google.guava:guava-bom:${guavaVersion}")
+        api platform("io.netty:netty-bom:$nettyVersion")
+        api platform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
+        api platform("org.apache.logging.log4j:log4j-bom:${log4jVersion}")
+        api platform("org.springframework:spring-framework-bom:${springVersion}")
+        api platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"){
+            exclude(module:"caffeine")
+        }
+
+        api("org.slf4j:slf4j-api:$slf4jVersion")
+        api("org.slf4j:jul-to-slf4j:$slf4jVersion")
+        api("org.apiguardian:apiguardian-api:1.1.2")
+        annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        compileOnly("jakarta.servlet:jakarta.servlet-api:$servletVersion")
+
+        test.useJUnitPlatform()
+
+        testImplementation("org.junit.jupiter:junit-jupiter-api"){
+            exclude(module:"apiguardian-api")
+        }
+        testRuntimeOnly  "org.junit.jupiter:junit-jupiter-engine"
+        testCompileOnly "org.springframework:spring-test"
+        testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+        testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+        testImplementation ("org.springframework:spring-test")
+    }
+
+    task compile
+    compile.dependsOn compileJava,javadoc, processResources,compileTestJava, processTestResources
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+    tasks.withType(Test) {
+        // Allow access to java.lang module
+        jvmArgs('--add-opens', 'java.base/java.lang=ALL-UNNAMED')
+    }
+    compileJava {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+        options.encoding = 'UTF-8'
+        options.with {
+            fork = true
+        }
+//        options.javaModuleVersion  = provider { subProject.version }
+        modularity.inferModulePath = false
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        modularity.inferModulePath = false
+    }
+
+    jar {
+        manifest {
+            attributes(
+                    'Created-By':"${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})".toString(),
+                    'Build-Date': buildDate,
+                    'Build-Time': buildTime,
+                    'Built-OS': "${System.properties['os.name']}",
+                    'Specification-Title': project.name,
+                    'Specification-Version': "${projectVersion}",
+                    'Specification-Vendor': 'xuxiang',
+                    'Implementation-Title': project.name,
+                    'Implementation-Version': "${projectVersion}",
+                    'Implementation-Vendor': 'xuxiang'
+            )
+        }
+    }
+
+    javadoc {
+        enabled =false
+        excludes = ['module-info.java']
+        description = "Generates project-level javadoc for use in -javadoc jar"
+
+        options.author = true
+        options.encoding="UTF-8"
+        options.charSet="UTF-8"
+        options.header = project.name
+        options.addStringOption('encoding', 'UTF-8')
+        options.addBooleanOption('no-header', true)
+        options.addBooleanOption('no-verify', true)
+        // suppress warnings due to cross-module @see and @link references;
+        // note that global 'api' task does display all warnings.
+        logging.captureStandardError LogLevel.INFO
+        logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        archiveClassifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar) {
+        archiveClassifier = "javadoc"
+        from javadoc
+    }
+
+    publishing {
+        publications{
+            maven(MavenPublication) {
+                artifactId subProject.name
+                version subProject.version
+                if (project.name.endsWith("bom")){
+                    pom.withXml {
+                        // Generate bom using subprojects
+                        def internalProjects = [
+                                subProject.name
+                        ]
+
+                        def dependencyManagement = asNode().appendNode('dependencyManagement')
+                        def dependencies = dependencyManagement.appendNode('dependencies')
+                        rootProject.subprojects.each { subproject ->
+                            if (internalProjects.contains(subproject.name)) {
+                                return
+                            }
+                            def dependencyNode = dependencies.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', subproject.group)
+                            dependencyNode.appendNode('artifactId', subproject.name)
+                            dependencyNode.appendNode('version', subproject.version)
+                        }
+                        def dependencyNode = dependencies.appendNode('dependency')
+                        //junit5
+                        dependencyNode.appendNode('groupId', "org.junit")
+                        dependencyNode.appendNode('artifactId', 'junit-bom')
+                        dependencyNode.appendNode('version', junitVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
+                        //apache
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.commons")
+                        dependencyNode.appendNode('artifactId', 'commons-lang3')
+                        dependencyNode.appendNode('version', lang3Version)
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.commons")
+                        dependencyNode.appendNode('artifactId', 'commons-text')
+                        dependencyNode.appendNode('version', textVersion)
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.commons")
+                        dependencyNode.appendNode('artifactId', 'commons-pool2')
+                        dependencyNode.appendNode('version', pool2Version)
+
+                        //lombok
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.projectlombok")
+                        dependencyNode.appendNode('artifactId', 'lombok')
+                        dependencyNode.appendNode('version', lombokVersion)
+                        //servlet
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "jakarta.servlet")
+                        dependencyNode.appendNode('artifactId', 'jakarta.servlet-api')
+                        dependencyNode.appendNode('version', servletVersion)
+                        //jakarta
+                        //Guava
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "com.google.guava")
+                        dependencyNode.appendNode('artifactId', 'guava-bom')
+                        dependencyNode.appendNode('version', guavaVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
+                        //Jackson
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "com.fasterxml.jackson")
+                        dependencyNode.appendNode('artifactId', 'jackson-bom')
+                        dependencyNode.appendNode('version', jacksonVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
+                        //netty
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "io.netty")
+                        dependencyNode.appendNode('artifactId', 'netty-bom')
+                        dependencyNode.appendNode('version', nettyVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
+                        //spring
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.springframework")
+                        dependencyNode.appendNode('artifactId', 'spring-framework-bom')
+                        dependencyNode.appendNode('version', springVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
+                        //spring-boot
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.springframework.boot")
+                        dependencyNode.appendNode('artifactId', 'spring-boot-dependencies')
+                        dependencyNode.appendNode('version', springBootVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
+                        //log4j2
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.logging.log4j")
+                        dependencyNode.appendNode('artifactId', 'log4j-bom')
+                        dependencyNode.appendNode('version', log4jVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.logging.log4j")
+                        dependencyNode.appendNode('artifactId', 'log4j-api')
+                        dependencyNode.appendNode('version', log4jVersion)
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.logging.log4j")
+                        dependencyNode.appendNode('artifactId', 'log4j-core')
+                        dependencyNode.appendNode('version', log4jVersion)
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.logging.log4j")
+                        dependencyNode.appendNode('artifactId', 'log4j-jcl')
+                        dependencyNode.appendNode('version', log4jVersion)
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.logging.log4j")
+                        dependencyNode.appendNode('artifactId', 'log4j-jul')
+                        dependencyNode.appendNode('version', log4jVersion)
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.logging.log4j")
+                        dependencyNode.appendNode('artifactId', 'log4j-slf4j2-impl')
+                        dependencyNode.appendNode('version', log4jVersion)
+                        //slf4j
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.slf4j")
+                        dependencyNode.appendNode('artifactId', 'slf4j-api')
+                        dependencyNode.appendNode('version', slf4jVersion)
+
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.slf4j")
+                        dependencyNode.appendNode('artifactId', 'jul-to-slf4j')
+                        dependencyNode.appendNode('version', slf4jVersion)
+
+                        //okhttp
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "com.squareup.okhttp3")
+                        dependencyNode.appendNode('artifactId', 'okhttp')
+                        dependencyNode.appendNode('version', okhttpVersion)
+                        //httpcore
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.httpcomponents.core5")
+                        dependencyNode.appendNode('artifactId', 'httpcore5')
+                        dependencyNode.appendNode('version', httpcoreVersion)
+                        //httpclient
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.apache.httpcomponents.client5")
+                        dependencyNode.appendNode('artifactId', 'httpclient5')
+                        dependencyNode.appendNode('version', httpclientVersion)
+                        //jedis
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "redis.clients")
+                        dependencyNode.appendNode('artifactId', 'jedis')
+                        dependencyNode.appendNode('version', jedisVersion)
+                        //mysql
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "com.mysql")
+                        dependencyNode.appendNode('artifactId', 'mysql-connector-j')
+                        dependencyNode.appendNode('version', mysqlVersion)
+                        //postgresql
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.postgresql")
+                        dependencyNode.appendNode('artifactId', 'postgresql')
+                        dependencyNode.appendNode('version', postgresqlVersion)
+                        //HikariCP
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "com.zaxxer")
+                        dependencyNode.appendNode('artifactId', 'HikariCP')
+                        dependencyNode.appendNode('version', hikariCPVersion)
+                        //gson
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "com.google.code.gson")
+                        dependencyNode.appendNode('artifactId', 'gson')
+                        dependencyNode.appendNode('version', gsonVersion)
+                        //mapstruct
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "org.mapstruct")
+                        dependencyNode.appendNode('artifactId', 'mapstruct')
+                        dependencyNode.appendNode('version', mapstructVersion)
+                    }
+                }else {
+                    from components.java
+                    artifact javadocJar
+//                    artifact proguardJar
+                    pom.withXml {
+                        def root = asNode()
+                        root.appendNode('name','spuddy')
+                        root.appendNode('description','')
+                    }
+                }
+                pom{
+                    developers {
+                        developer {
+                            id = 'xux'
+                            name = 'xuxiang'
+                            email = 'downloadxu@163.com'
+                        }
+                    }
+                }
+
+            }
+        }
+        repositories{
+            maven {
+                /*name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/buzzxu/")
+                credentials {
+                    username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                    password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+                }*/
+            }
+        }
+    }
+}
