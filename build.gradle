@@ -405,7 +405,7 @@ subprojects { subProject->
                     password  System.getenv("ALIYUN_PWD")
                 }
                 /*name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/buzzxu/yuanmai-platform")
+                url = uri("https://maven.pkg.github.com/buzzxu/")
                 credentials {
                     username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
                     password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")

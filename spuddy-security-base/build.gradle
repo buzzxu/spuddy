@@ -1,4 +1,4 @@
 dependencies {
-
+    api project(':spuddy-security-objects')
     api project(':spuddy-redis')
 }

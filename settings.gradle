@@ -17,4 +17,5 @@ include 'spuddy-redis'
 include 'spuddy-security-jwt'
 include 'spuddy-secutiry-simple-jwt'
 include 'spuddy-spring-boot'
+include 'spuddy-security-objects'
 

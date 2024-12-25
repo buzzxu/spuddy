@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-import static io.github.buzzxu.spuddy.security.KEYs.USER_TOKEN;
+import static io.github.buzzxu.spuddy.security.KEY.USER_TOKEN;
 
 
 /**

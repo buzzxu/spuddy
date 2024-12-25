@@ -16,7 +16,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static io.github.buzzxu.spuddy.security.KEYs.USER_TOKEN;
+import static io.github.buzzxu.spuddy.security.KEY.USER_TOKEN;
+
 
 /**
  * @program: shxmao-platform
@@ -61,7 +62,7 @@ public abstract class AccountService {
 
 
     protected <U extends UserInfo> Supplier<String> jwtSecretSupplier(U userInfo){
-        return () -> userInfo.getPsword();
+        return userInfo::getPassword;
     }
 
     protected <U extends UserInfo> Consumer<JWTCreator.Builder> jwtConsumer(U userInfo){

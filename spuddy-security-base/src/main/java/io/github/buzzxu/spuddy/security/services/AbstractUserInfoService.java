@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static io.github.buzzxu.spuddy.security.KEYs.USER_INFO;
+import static io.github.buzzxu.spuddy.security.KEY.USER_INFO;
 
 
 /**

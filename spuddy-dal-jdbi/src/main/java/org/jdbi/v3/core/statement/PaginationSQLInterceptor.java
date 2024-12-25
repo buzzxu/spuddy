@@ -23,7 +23,7 @@ import static io.github.buzzxu.spuddy.dal.jdbi.JdbiUtil.DefalutPageineRawSql;
 
 /**
  * @see SqlStatement
- * @program: yuanmai-platform
+ * @program: 
  * @description:
  * @author: 徐翔
  * @create: 2020-02-29 21:14

@@ -23,7 +23,7 @@ public abstract class RequiresUserPasswordHandler <U extends UserInfo> extends R
     @Override
     protected String jwtSecretKey(Optional<U> userInfo, int type) {
         U user = userInfo.get();
-        String password = user.getPsword();
+        String password = user.getPassword();
         if(Strings.isNullOrEmpty(password)){
             password = userInfoService.password(user.getId(),type).get();
         }
