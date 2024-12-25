@@ -1,15 +1,16 @@
-name: Publish Package
+name: Publish Release Package
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types: [ created ]
 
 env:
   GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
   MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+  ALIYUN_USERNAME: ${{ secrets.ALIYUN_USERNAME }}
+  ALIYUN_PWD: ${{ secrets.ALIYUN_PWD }}
 
 jobs:
   publish:
@@ -26,4 +27,4 @@ jobs:
       - run: gradle build
       - run: echo "${{secrets.GPG_BASE64}}" > ~/.gradle/secring.gpg.base64
       - run: base64 -d ~/.gradle/secring.gpg.base64 > ~/.gradle/secring.gpg
-      - run: gradle publish -x test -PpublishToAliyun -Psigning.keyId=${{secrets.GPG_KEYID}} -Psigning.password=${{secrets.GPG_PASSWORD}} -Psigning.secretKeyRingFile=$(echo ~/.gradle/secring.gpg)
+      - run: gradle publish -x test -Psigning.keyId=${{secrets.GPG_KEYID}} -Psigning.password=${{secrets.GPG_PASSWORD}} -Psigning.secretKeyRingFile=$(echo ~/.gradle/secring.gpg)

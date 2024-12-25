@@ -190,6 +190,11 @@ subprojects { subProject->
         archiveClassifier = "javadoc"
         from javadoc
     }
+    tasks.withType(PublishToMavenRepository) {
+        onlyIf {
+            project.hasProperty('publishToAliyun') && repository.name == "Aliyun Packages"
+        }
+    }
 
     publishing {
         publications{
@@ -396,6 +401,22 @@ subprojects { subProject->
         }
         repositories{
             maven {
+                name = "Aliyun Packages"
+                def releasesRepoUrl = "https://packages.aliyun.com/maven/repository/2003547-release-AmXxfp/"
+                def snapshotsRepoUrl = "https://packages.aliyun.com/maven/repository/2003547-snapshot-xxdKnz/"
+                url =  uri(version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl)
+                credentials(PasswordCredentials) {
+                    username  System.getenv("ALIYUN_USERNAME")
+                    password  System.getenv("ALIYUN_PWD")
+                }
+                /*name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/buzzxu/yuanmai-platform")
+                credentials {
+                    username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                    password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+                }*/
+            }
+            maven {
                 name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/buzzxu/spuddy")
                 credentials {
@@ -414,7 +435,6 @@ subprojects { subProject->
                 }
             }
         }
-
 
     }
 }
