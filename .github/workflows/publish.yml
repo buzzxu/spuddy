@@ -11,7 +11,7 @@ env:
   MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
   MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
-obs:
+jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
