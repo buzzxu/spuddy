@@ -27,7 +27,7 @@ public class SpuddyContextInitializer extends AbstractSpringInitializer<Annotati
         if(mainClass.isAnnotationPresent(SpuddySpringBoot.class)){
             spuddy = mainClass.getAnnotation(SpuddySpringBoot.class);
         }else{
-            throw new NotFoundException(mainClass + " not found @XmSpringBoot");
+            throw new NotFoundException(mainClass + " not found @SpuddySpringBoot");
         }
         if(applicationContext.getEnvironment().getActiveProfiles().length >0){
             stage = Stage.N(applicationContext.getEnvironment().getActiveProfiles()[0]);
