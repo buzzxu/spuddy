@@ -4,6 +4,7 @@ bin/
 .idea/
 .settings/
 target/
+build/
 .gradle/
 .vscode
 
