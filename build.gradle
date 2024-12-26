@@ -83,6 +83,7 @@ subprojects { subProject->
         compile.exclude group:'javax.inject',module:"javax.inject"
         compile.exclude group:'javax.ws.rs',module: "jsr311-api"
         compile.exclude group:'javax.xml.bind',module:"jaxb-api"
+        compile.exclude group:'jakarta.servlet',module: "jakarta.servlet-api",version: "6.0.0"
         testCompile.exclude group:'commons-logging'
         testCompile.exclude group:'ch.qos.logback'
         testCompile.extendsFrom compileOnly

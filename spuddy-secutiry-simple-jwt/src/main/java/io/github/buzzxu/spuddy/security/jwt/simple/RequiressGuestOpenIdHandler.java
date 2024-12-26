@@ -2,7 +2,7 @@ package io.github.buzzxu.spuddy.security.jwt.simple;
 
 import com.google.common.base.Strings;
 import io.github.buzzxu.spuddy.security.objects.UserInfo;
-import io.github.buzzxu.spuddy.security.services.UserInfoService;
+import io.github.buzzxu.spuddy.security.UserInfoService;
 
 import java.util.Optional;
 

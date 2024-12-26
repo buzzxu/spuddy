@@ -1,4 +1,4 @@
-package io.github.buzzxu.spuddy.security.services;
+package io.github.buzzxu.spuddy.security;
 
 
 

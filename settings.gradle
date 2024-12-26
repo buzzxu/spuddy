@@ -18,4 +18,6 @@ include 'spuddy-security-jwt'
 include 'spuddy-secutiry-simple-jwt'
 include 'spuddy-spring-boot'
 include 'spuddy-security-objects'
+include 'spuddy-dal-jdbc'
+include 'spuddy-security-shiro-jwt'
 

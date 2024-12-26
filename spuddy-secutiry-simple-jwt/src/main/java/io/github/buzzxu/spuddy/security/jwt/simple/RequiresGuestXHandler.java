@@ -4,7 +4,7 @@ import io.github.buzzxu.spuddy.errors.SecurityException;
 import io.github.buzzxu.spuddy.security.annotation.RequiresUser;
 import io.github.buzzxu.spuddy.security.jwt.handler.RequireUserHandler;
 import io.github.buzzxu.spuddy.security.objects.UserInfo;
-import io.github.buzzxu.spuddy.security.services.UserInfoService;
+import io.github.buzzxu.spuddy.security.UserInfoService;
 
 /**
  * @author 徐翔

@@ -21,22 +21,7 @@ public interface UserService {
 
 
 
-    /**
-     * 创建用户
-     * @param type
-     * @return
-     */
-    default long create(int type){
-        return create(type, UserSource.PC);
-    }
 
-    /**
-     * 创建用户
-     * @param type
-     * @param source
-     * @return
-     */
-    long create(int type,UserSource source);
 
     /**
      * 创建用户
@@ -282,7 +267,7 @@ public interface UserService {
      * @param name
      * @return
      */
-    boolean existedNikeName(String name);
+    boolean existedNickName(String name);
     /**
      * 是否包含用户
      * @param name  用户名/手机号/邮箱
@@ -552,22 +537,7 @@ public interface UserService {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * 开启两步验证
-     * @param userId
-     * @return
-     */
-    default String enable2FA(long userId){
-        throw new UnsupportedOperationException();
-    }
 
-    /**
-     * 关闭两步验证
-     * @param userId
-     */
-    default void disable2FA(long userId){
-        throw new UnsupportedOperationException();
-    }
 
 
     /**

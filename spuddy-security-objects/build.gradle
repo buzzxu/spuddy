@@ -1,0 +1,5 @@
+dependencies {
+    api project(':spuddy-objects')
+
+    compileOnly(project(':spuddy-commons'))
+}

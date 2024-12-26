@@ -1,4 +1,5 @@
 dependencies {
     api project(':spuddy-security-objects')
+    api project(":spuddy-dal-jdbc")
     api project(':spuddy-redis')
 }

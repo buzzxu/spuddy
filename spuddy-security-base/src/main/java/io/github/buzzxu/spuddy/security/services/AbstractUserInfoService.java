@@ -2,6 +2,7 @@ package io.github.buzzxu.spuddy.security.services;
 
 import io.github.buzzxu.spuddy.errors.SecurityException;
 import io.github.buzzxu.spuddy.redis.Redis;
+import io.github.buzzxu.spuddy.security.UserInfoService;
 import io.github.buzzxu.spuddy.security.objects.UserInfo;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import static io.github.buzzxu.spuddy.security.KEY.USER_INFO;
  * @author 徐翔
  * @create 2021-08-26 10:31
  **/
-public abstract class AbstractUserInfoService implements UserInfoService{
+public abstract class AbstractUserInfoService implements UserInfoService {
     @Autowired
     protected Redis redis;
     protected long expireUserTime;

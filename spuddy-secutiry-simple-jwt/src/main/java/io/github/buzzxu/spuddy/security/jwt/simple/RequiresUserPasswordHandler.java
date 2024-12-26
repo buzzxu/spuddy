@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import io.github.buzzxu.spuddy.errors.SecurityException;
 import io.github.buzzxu.spuddy.security.jwt.handler.RequireUserHandler;
 import io.github.buzzxu.spuddy.security.objects.UserInfo;
-import io.github.buzzxu.spuddy.security.services.UserInfoService;
+import io.github.buzzxu.spuddy.security.UserInfoService;
 
 import java.util.Optional;
 

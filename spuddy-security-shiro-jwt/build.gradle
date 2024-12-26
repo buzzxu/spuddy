@@ -1,0 +1,10 @@
+dependencies {
+    api project(':spuddy-security-base')
+    api project(':spuddy-redis')
+    api project(':spuddy-security-jwt')
+    api("org.apache.shiro:shiro-spring:${shiroVersion}:jakarta"){
+        exclude(module:"shiro-web")
+    }
+    api "org.apache.shiro:shiro-web:${shiroVersion}:jakarta"
+
+}

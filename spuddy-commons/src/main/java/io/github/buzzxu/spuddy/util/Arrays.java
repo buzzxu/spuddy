@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -261,6 +262,16 @@ public class Arrays {
     }
     public static <T> boolean isNotEmpty(T[] array) {
         return null != array && array.length != 0;
+    }
+
+    public static boolean contains(int[] array,int value){
+        return  java.util.Arrays.stream(array).anyMatch(x ->Objects.equals(x,value));
+    }
+    public static boolean contains(long[] array,long value){
+        return  java.util.Arrays.stream(array).anyMatch(x ->Objects.equals(x,value));
+    }
+    public static boolean contains(Object[] array,Object value){
+        return java.util.Arrays.asList(array).contains(value);
     }
 
 }

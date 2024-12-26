@@ -8,7 +8,7 @@ import io.github.buzzxu.spuddy.security.exceptions.TokenAuthException;
 import io.github.buzzxu.spuddy.security.handler.RequiresHandler;
 import io.github.buzzxu.spuddy.security.jwt.JWTs;
 import io.github.buzzxu.spuddy.security.objects.UserInfo;
-import io.github.buzzxu.spuddy.security.services.UserInfoService;
+import io.github.buzzxu.spuddy.security.UserInfoService;
 import io.github.buzzxu.spuddy.errors.SecurityException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

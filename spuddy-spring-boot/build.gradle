@@ -25,12 +25,13 @@ dependencies {
     implementation("org.springframework:spring-aspects")
     api("io.undertow:undertow-websockets-jsr:$undertowVersion"){
         exclude (module:"jboss-logging")
+        exclude (module:"jakarta.servlet-api")
     }
     implementation("org.jboss.logging:jboss-logging:$jbossLoggingVersion")
     implementation("org.springframework.boot:spring-boot-starter-undertow"){
         exclude (group:"io.undertow")
         exclude (module:"jboss-logging")
-        exclude (module:"javax.servlet-api")
+        exclude (module:"jakarta.servlet-api")
         exclude (group:"org.apache.tomcat.embed")
     }
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
