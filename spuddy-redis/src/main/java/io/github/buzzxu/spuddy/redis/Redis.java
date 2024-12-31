@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -26,7 +27,7 @@ public interface Redis {
      */
     <R, SYNC extends Function<Jedis, R>> R execute(SYNC func);
 
-
+    <T> List<T> gets(String key, long second, Supplier<List<T>> supplier, Class<T> clazz);
     default Optional<byte[]> rmget(byte[] key){
         return execute(redis->{
             if(redis.exists(key)){
