@@ -6,6 +6,7 @@ import io.github.buzzxu.spuddy.errors.LockedAccountException;
 import io.github.buzzxu.spuddy.errors.UnauthorizedException;
 import io.github.buzzxu.spuddy.objects.RealnameVerified;
 import io.github.buzzxu.spuddy.security.objects.OAuthUser;
+import io.github.buzzxu.spuddy.security.objects.PrivilegeInfo;
 import io.github.buzzxu.spuddy.security.objects.User;
 import io.github.buzzxu.spuddy.security.objects.UserInfo;
 
@@ -19,10 +20,11 @@ import java.util.function.Supplier;
 
 public interface UserService {
 
-
-
-
-
+    String SQL_COLUMNS = """
+            ub.id,ub.org_id,ub.type,ub.user_name,ub.mobile,ub.email,ub.password,ub.salt,nick_name AS nickName,
+            ub.real_name,ub.avatar,ub.status,ub.gender,ub.source,ub.verified,ub.firstlogin,ub.merge,ub.is_2fa AS use2FA,
+            ub.secret_2fa AS secret2FA,ub.operator,ub.created_at,ub.updated_at
+            """;
     /**
      * 创建用户
      * @param userInfo
@@ -558,4 +560,11 @@ public interface UserService {
     default void verified(long userId, RealnameVerified verified){
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * 获取特权信息
+     * @param userId
+     * @return
+     */
+    Optional<PrivilegeInfo> pvgInfo(long userId);
 }

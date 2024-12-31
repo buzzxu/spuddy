@@ -34,4 +34,13 @@ public interface RequiresHandler<U extends UserInfo>  {
     default U anonymous(){
         return (U) UserInfo.anonymous();
     }
+
+    /**
+     * 获取用户ID
+     * @param token
+     * @return
+     */
+    default Long id(String token){
+        throw new UnsupportedOperationException();
+    }
 }

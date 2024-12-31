@@ -7,9 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serial;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+
+import static io.github.buzzxu.spuddy.util.Dates.asLocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
@@ -41,7 +45,7 @@ public class UserInfo extends User {
         return Operator.builder()
                 .id(id)
                 .userName(getUserName())
-                .nickName(getNikeName())
+                .nickName(nickName)
                 .realName(getRealName())
                 .email(getEmail())
                 .mobile(getMobile())

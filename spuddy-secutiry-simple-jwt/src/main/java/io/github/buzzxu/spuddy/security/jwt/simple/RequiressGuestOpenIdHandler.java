@@ -14,7 +14,7 @@ import java.util.Optional;
  **/
 public abstract class RequiressGuestOpenIdHandler <U extends UserInfo> extends RequiresGuestXHandler<U>{
 
-    public RequiressGuestOpenIdHandler(UserInfoService userInfoService) {
+    public RequiressGuestOpenIdHandler(UserInfoService<U> userInfoService) {
         super(userInfoService);
     }
 

@@ -102,7 +102,7 @@ public class StandardMenu extends AbstractStandard implements MenuService {
                     return Optional.of(val);
                 }
                 return Optional.empty();
-            },parentId,Strings.nullToEmpty(region),name,code,target,path,icon,ext == null ? null : Jackson.object2Json(ext),langs == null ? null : Jackson.object2Json(langs),Strings.nullToEmpty(remark),asDate(LocalDateTime.now()));
+            },parentId,Strings.nullToEmpty(region),name,code,target,path,icon,ext == null ? null : Jackson.object2Json(ext),langs == null ? null : Jackson.object2Json(langs),Strings.nullToEmpty(remark),LocalDateTime.now());
             if(menu.isPresent()){
                 if(function != null && !function.apply(menu.get())){
                     throw new IllegalArgumentException("菜单创建被系统拒绝");
@@ -311,7 +311,7 @@ public class StandardMenu extends AbstractStandard implements MenuService {
             if(ext != null){
                 sql += " JOIN t_role r ON (rm.role_id = r.id) ";
             }
-            sql += " LEFT JOIN "+tableName+" m ON rm.menu_id = m.id  WHERE rm.role_id "+whereIds(IntStream.of(roleId).boxed().toList())+" AND m.enable=1 ";
+            sql += " LEFT JOIN "+tableName+" m ON rm.menu_id = m.id  WHERE rm.role_id "+whereIds(IntStream.of(roleId).boxed().toList())+" AND m.enable=true ";
             if(region != null){
                 sql += " AND m.region = '"+region+"' ";
             }
@@ -376,7 +376,7 @@ public class StandardMenu extends AbstractStandard implements MenuService {
     @Override
     public List<Menu> findByRoleId(String region, int... roleIds) throws SecurityException {
         try {
-            String sql = "SELECT m.id,m.region,m.name,m.parent_id,m.code,m.enable,m.target,m.path,m.icon,m.depth,m.remark,m.sort,m.ext,m.langs FROM t_role_menu rm LEFT JOIN "+tableName+" m ON rm.menu_id = m.id  WHERE rm.role_id "+whereIds(IntStream.of(roleIds).boxed().toList())+" AND m.enable=1 ";
+            String sql = "SELECT m.id,m.region,m.name,m.parent_id,m.code,m.enable,m.target,m.path,m.icon,m.depth,m.remark,m.sort,m.ext,m.langs FROM t_role_menu rm LEFT JOIN "+tableName+" m ON rm.menu_id = m.id  WHERE rm.role_id "+whereIds(IntStream.of(roleIds).boxed().toList())+" AND m.enable=true ";
             if(region != null){
                 sql += " AND m.region = '"+region+"' ";
             }
@@ -394,7 +394,7 @@ public class StandardMenu extends AbstractStandard implements MenuService {
             if(ext != null){
                 sql += " JOIN t_role r ON (rm.role_id = r.id) ";
             }
-            sql += " LEFT JOIN "+tableName+" m ON rm.menu_id = m.id  WHERE rm.role_id "+whereIds(IntStream.of(roleIds).boxed().toList())+" AND m.enable=1 ";
+            sql += " LEFT JOIN "+tableName+" m ON rm.menu_id = m.id  WHERE rm.role_id "+whereIds(IntStream.of(roleIds).boxed().toList())+" AND m.enable=true ";
             if(region != null){
                 sql += " AND m.region = '"+region+"' ";
             }
@@ -447,7 +447,7 @@ public class StandardMenu extends AbstractStandard implements MenuService {
     @Override
     public List<Menu> getOnlyEnable() {
         try {
-            return queryMenus("SELECT "+COLUMNS+" FROM "+tableName+" WHERE enable=1 ORDER BY sort DESC",(Object[])null);
+            return queryMenus("SELECT "+COLUMNS+" FROM "+tableName+" WHERE enable=true ORDER BY sort DESC",(Object[])null);
         } catch (SQLException e) {
             log.error("查询菜单,发生异常: {}",e.getMessage(),e);
             throw ApplicationException.raise(e);

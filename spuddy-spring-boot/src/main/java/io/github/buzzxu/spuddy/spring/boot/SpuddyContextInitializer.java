@@ -7,12 +7,17 @@ import io.github.buzzxu.spuddy.errors.NotFoundException;
 import io.github.buzzxu.spuddy.spring.AbstractSpringInitializer;
 import org.slf4j.Logger;
 import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 
 /**
  * @author 徐翔
  * @create 2021-08-25 15:43
  **/
-public class SpuddyContextInitializer extends AbstractSpringInitializer<AnnotationConfigServletWebServerApplicationContext> {
+public class SpuddyContextInitializer extends AbstractSpringInitializer<ConfigurableApplicationContext >  {
     private Class<?> mainClass;
 
     public SpuddyContextInitializer(Class<?> mainClass, Logger logger) {
@@ -21,7 +26,7 @@ public class SpuddyContextInitializer extends AbstractSpringInitializer<Annotati
     }
 
     @Override
-    public void initialize(AnnotationConfigServletWebServerApplicationContext applicationContext) {
+    public void initialize(ConfigurableApplicationContext  applicationContext) {
         SpuddySpringBoot spuddy ;
         Stage stage = null;
         if(mainClass.isAnnotationPresent(SpuddySpringBoot.class)){

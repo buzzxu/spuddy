@@ -47,9 +47,9 @@ public class JedisConfigure {
             throw new IllegalArgumentException("Redis Url error.(as 127.0.0.1:7689)"+url);
         }
         if(!Strings.isNullOrEmpty(redisConfig.getUser())){
-            return new JedisPool(poolConfig,hostAndPort[0],Integer.parseInt(hostAndPort[1]),redisConfig.getTimeout(), redisConfig.getUser(),Strings.emptyToNull(redisConfig.getPassword()));
+            return new JedisPool(poolConfig,hostAndPort[0],Integer.parseInt(hostAndPort[1]),redisConfig.getTimeout(), redisConfig.getUser(),Strings.emptyToNull(redisConfig.getPassword()),redisConfig.getDb());
         }
-        return new JedisPool(poolConfig,hostAndPort[0],Integer.parseInt(hostAndPort[1]),redisConfig.getTimeout(), Strings.emptyToNull(redisConfig.getPassword()));
+        return new JedisPool(poolConfig,hostAndPort[0],Integer.parseInt(hostAndPort[1]),redisConfig.getTimeout(), Strings.emptyToNull(redisConfig.getPassword()),redisConfig.getDb());
     }
 
     @DependsOn("redisPool")

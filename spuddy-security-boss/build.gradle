@@ -1,0 +1,5 @@
+dependencies {
+    api project(':spuddy-security-account')
+    api project(':spuddy-security-shiro-jwt')
+    api project(':spuddy-spring-boot')
+}

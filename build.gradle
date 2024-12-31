@@ -284,6 +284,13 @@ subprojects { subProject->
                         dependencyNode.appendNode('version', springBootVersion)
                         dependencyNode.appendNode('type', 'pom')
                         dependencyNode.appendNode('scope','import')
+                        //undertow
+                        dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', "io.undertow")
+                        dependencyNode.appendNode('artifactId', 'undertow-parent')
+                        dependencyNode.appendNode('version', undertowVersion)
+                        dependencyNode.appendNode('type', 'pom')
+                        dependencyNode.appendNode('scope','import')
                         //log4j2
                         dependencyNode = dependencies.appendNode('dependency')
                         dependencyNode.appendNode('groupId', "org.apache.logging.log4j")

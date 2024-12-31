@@ -1,11 +1,13 @@
 package io.github.buzzxu.spuddy.security.objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.buzzxu.spuddy.objects.i18n.Langs;
 import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +39,15 @@ public class Role implements Serializable {
     private List<Permisson> perms;
     private Map<String,Object> ext;
     private Langs langs;
-    private Date createdAt;
-    private Date updatedAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedAt;
 
-    public Role(int id, int parentId, String name, String code,RoleType type, Date createdAt, Date updatedAt) {
+    public Role(int id, int parentId, String name, String code,RoleType type, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this(id,parentId,name,code,type,null,null,createdAt,updatedAt);
     }
-    public Role(int id, int parentId, String name, String code, RoleType type,Map<String,Object> ext,Langs langs,Date createdAt, Date updatedAt) {
+    public Role(int id, int parentId, String name, String code, RoleType type,Map<String,Object> ext,Langs langs,LocalDateTime createdAt, LocalDateTime updatedAt) {
         this(id,parentId,0,name,code,type,null,null,null,ext,langs,createdAt,updatedAt);
     }
 

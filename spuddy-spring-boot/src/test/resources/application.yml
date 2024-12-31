@@ -1,3 +1,13 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /
 spring:
   profiles:
     active: test
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+
+shiro:
+  filterMapping: /login:anon,/captcha:anon,/open/**:anon

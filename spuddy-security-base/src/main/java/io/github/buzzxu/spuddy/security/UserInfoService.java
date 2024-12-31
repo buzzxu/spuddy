@@ -14,18 +14,22 @@ import java.util.function.Supplier;
  * @author 徐翔
  * @create 2021-08-26 10:09
  **/
-public interface UserInfoService {
+public interface UserInfoService<U extends UserInfo> {
 
+    Integer type(long id);
     Optional<String> password(long userId, int type);
 
     default Optional<String> openId(long userId){
         return Optional.empty();
     }
 
-    <U extends UserInfo> U of(long id, int type, Class<U> clazz);
-    <U extends UserInfo> U of(long userId, int type, Supplier<U> supplier, Class<U> clazz);
+    default  U of(long id,Class<U> clazz){
+        return of(id,type(id),clazz);
+    }
+     U of(long id, int type, Class<U> clazz);
+     U of(long userId, int type, Supplier<U> supplier, Class<U> clazz);
 
-    default <U extends UserInfo> UserInfo convert(Map<String,String> user, int type, Class<U> clazz){
+    default  UserInfo convert(Map<String,String> user, int type, Class<U> clazz){
         return UserInfo.from(user,clazz);
     }
 }

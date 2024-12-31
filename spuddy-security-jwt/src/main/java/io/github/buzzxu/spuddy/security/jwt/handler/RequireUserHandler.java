@@ -29,7 +29,7 @@ public abstract class RequireUserHandler<U extends UserInfo> implements Requires
     @Autowired
     protected Redis redis;
 
-    protected UserInfoService userInfoService;
+    protected UserInfoService<U> userInfoService;
 
     protected abstract boolean identity(String token);
 
@@ -39,7 +39,7 @@ public abstract class RequireUserHandler<U extends UserInfo> implements Requires
         return userInfo.isPresent() && jwts.verify(token, jwtSecretKey(userInfo,type));
     }
 
-    public RequireUserHandler(UserInfoService userInfoService) {
+    public RequireUserHandler(UserInfoService<U> userInfoService) {
         this.userInfoService = userInfoService;
     }
 
@@ -78,7 +78,7 @@ public abstract class RequireUserHandler<U extends UserInfo> implements Requires
      * @param token
      * @return
      */
-    protected Long id(String token){
+    public Long id(String token){
         if(Strings.isNullOrEmpty(token)){
             throw new TokenAuthException("验证身份失败,请先登陆之后再访问");
         }

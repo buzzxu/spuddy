@@ -12,7 +12,7 @@ import io.github.buzzxu.spuddy.security.UserInfoService;
  **/
 public abstract class RequiresGuestXHandler<U extends UserInfo> extends RequireUserHandler<U> {
 
-    public RequiresGuestXHandler(UserInfoService userInfoService) {
+    public RequiresGuestXHandler(UserInfoService<U> userInfoService) {
         super(userInfoService);
     }
 

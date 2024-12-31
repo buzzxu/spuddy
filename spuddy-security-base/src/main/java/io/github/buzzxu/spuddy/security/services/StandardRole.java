@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
@@ -107,7 +108,7 @@ public class StandardRole extends AbstractStandard implements RoleService {
     @Override
     public int create(int parentId, int region, String name, String code, RoleType type, String description, Map<String, Object> ext, Langs langs, Consumer<Role> consumer) {
         checkArgument(!Strings.isNullOrEmpty(name) && !Strings.isNullOrEmpty(code) && (code.length() > 3 && code.length() < 15),"名称和编码不能为空，或者编码不符合规范" );
-        Date now = asDate(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
         try {
             if(qr.query("SELECT COUNT(*) FROM t_role WHERE code=? OR name =? LIMIT 1",new ScalarHandler<Long>(1),code.trim(),name.trim())>0){
                 throw new IllegalArgumentException("已存在相同的角色编码");
@@ -197,7 +198,7 @@ public class StandardRole extends AbstractStandard implements RoleService {
             if(region > 0){
                 $role.setRegion(region);
             }
-            $role.setUpdatedAt(asDate(LocalDateTime.now()));
+            $role.setUpdatedAt(LocalDateTime.now());
             boolean flag = qr.update("UPDATE t_role SET parent_id=?,region = ?,code=?,name=?,updated_at=? WHERE id=?",$role.getParentId(),region,$role.getCode(),$role.getName(),$role.getUpdatedAt(),id) > 0;
             if(flag && consumer != null){
                 consumer.accept($role);
@@ -255,8 +256,8 @@ public class StandardRole extends AbstractStandard implements RoleService {
                 if(!Strings.isNullOrEmpty(ext)){
                     val.setExt(Jackson.json2Map(ext));
                 }
-                val.setCreatedAt(rs.getDate("created_at"));
-                val.setUpdatedAt(rs.getDate("updated_at"));
+                val.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                val.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
                 return Optional.of(val);
             }
             return Optional.empty();
@@ -328,8 +329,8 @@ public class StandardRole extends AbstractStandard implements RoleService {
         if(!Strings.isNullOrEmpty($ext)){
             val.setExt(Jackson.json2Map($ext));
         }
-        val.setCreatedAt(rs.getDate("created_at"));
-        val.setUpdatedAt(rs.getDate("updated_at"));
+        val.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        val.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         return val;
     }
     @Override

@@ -8,10 +8,9 @@ redis:
     max-idle: 2000
     max-total: 2000
     max-wait: 5000
-
 db:
   connection:
     username: jd_devel
-    password: Nq%nUX8sZysv#b267FWz
+    password: Mn2996Pgd1YgqsPNNAXu
     url: jdbc:postgresql://pgm-uf6713x8gfi411gdio.pg.rds.aliyuncs.com:5432/jt
     driver-class-name: org.postgresql.Driver

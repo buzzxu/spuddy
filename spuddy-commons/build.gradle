@@ -34,4 +34,6 @@ dependencies {
     api "org.mindrot:jbcrypt:0.4"
 
     api('com.google.re2j:re2j:1.7')
+
+    api("net.pusuo:patchca:0.5.0")
 }

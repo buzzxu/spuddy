@@ -1,14 +1,14 @@
 package io.github.buzzxu.spuddy.spring.boot;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author 徐翔
  * @create 2021-08-25 15:11
  **/
+
 @SpuddySpringBoot
-public class SpringBootRunner {
+public class SpringBootRunnerTest {
 
     @Test
     public void start(){
@@ -16,6 +16,11 @@ public class SpringBootRunner {
     }
 
     public static void main(String[] args) {
-        new SpringBootApp( ).run(SpringBootRunner.class,args);
+        try {
+            new SpringBootApp( ).run(SpringBootRunnerTest.class,args);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

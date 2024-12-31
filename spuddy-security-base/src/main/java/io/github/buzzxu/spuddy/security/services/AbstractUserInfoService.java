@@ -3,8 +3,11 @@ package io.github.buzzxu.spuddy.security.services;
 import io.github.buzzxu.spuddy.errors.SecurityException;
 import io.github.buzzxu.spuddy.redis.Redis;
 import io.github.buzzxu.spuddy.security.UserInfoService;
+import io.github.buzzxu.spuddy.security.UserService;
 import io.github.buzzxu.spuddy.security.objects.UserInfo;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -21,24 +24,33 @@ import static io.github.buzzxu.spuddy.security.KEY.USER_INFO;
  * @author 徐翔
  * @create 2021-08-26 10:31
  **/
-public abstract class AbstractUserInfoService implements UserInfoService {
-    @Autowired
+@RequiredArgsConstructor
+public abstract class AbstractUserInfoService<U extends UserInfo> implements UserInfoService<U> {
+    protected final Class<U> clazz;
+    @Resource
     protected Redis redis;
     protected long expireUserTime;
     @Value("${jwt.expiration:7}")
     protected int expiration;
+    @Resource(type = UserService.class)
+    protected UserService userService;
     @PostConstruct
     public void init(){
         this.expireUserTime = Duration.ofDays(expiration).toSeconds();
     }
 
     @Override
-    public <U extends UserInfo> U of(long id, int type, Class<U> clazz) {
+    public Integer type(long id) {
+        return userService.type(id).orElseThrow(()-> new SecurityException("无法获取身份信息",401));
+    }
+
+    @Override
+    public  U of(long id, int type, Class<U> clazz) {
         return of(id,type,()->load(id,type),clazz);
     }
 
     @Override
-    public <U extends UserInfo> U of(long userId, int type, Supplier<U> supplier, Class<U> clazz) {
+    public U of(long userId, int type, Supplier<U> supplier, Class<U> clazz) {
         if(userId ==0){
             throw new SecurityException("无法获取身份信息",401);
         }
@@ -50,7 +62,7 @@ public abstract class AbstractUserInfoService implements UserInfoService {
                     redis.del(key);
                     return Optional.empty();
                 }
-                return Optional.of(convert(data,Integer.valueOf(data.get("type")),clazz));
+                return Optional.of(convert(data,Integer.parseInt(data.get("type")),clazz));
             }else{
                 return Optional.empty();
             }
@@ -74,5 +86,11 @@ public abstract class AbstractUserInfoService implements UserInfoService {
         }).get();
     }
 
-    protected abstract <T extends UserInfo> T load(long userId, int type) throws SecurityException;
+    @Override
+    public Optional<String> password(long userId, int type) {
+        U userInfo = of(userId,type,clazz);
+        return userInfo != null ? Optional.of(userInfo.getPassword()) : Optional.empty();
+    }
+
+    protected abstract U load(long userId, int type) throws SecurityException;
 }

@@ -40,7 +40,7 @@ public abstract class User extends Id<Long> implements Principal{
     /**
      * 昵称
      */
-    protected String nikeName;
+    protected String nickName;
     protected String mobile;
     protected String email;
     @JsonIgnore
@@ -96,12 +96,12 @@ public abstract class User extends Id<Long> implements Principal{
     protected boolean verified;
     @JsonIgnore
     protected boolean mobileIsUserName;
-    public User(Long id, boolean deleted, LocalDateTime createdAt, LocalDateTime updatedAt, String realName, String avatar, String userName, String nikeName, String mobile, String email, String password, String salt, int status, boolean firstLogin, int type, int gender, int source, OAuthUser oAuthUser) {
+    public User(Long id, boolean deleted, LocalDateTime createdAt, LocalDateTime updatedAt, String realName, String avatar, String userName, String nickName, String mobile, String email, String password, String salt, int status, boolean firstLogin, int type, int gender, int source, OAuthUser oAuthUser) {
         super(id, deleted, createdAt, updatedAt);
         this.realName = realName;
         this.avatar = avatar;
         this.userName = userName;
-        this.nikeName = nikeName;
+        this.nickName = nickName;
         this.mobile = mobile;
         this.email = email;
         this.password = password;
@@ -121,7 +121,9 @@ public abstract class User extends Id<Long> implements Principal{
     public Map<String,String> map(){
         Map<String,String> hash = Converts.map(this);
         hash.put("password",getPassword());
-        hash.put("secret2FA",getSecret2FA());
+        if(!Strings.isNullOrEmpty(this.secret2FA)){
+            hash.put("secret2FA",secret2FA);
+        }
         return hash;
     }
 
@@ -160,6 +162,10 @@ public abstract class User extends Id<Long> implements Principal{
     }
     @JsonIgnore
     public String name(){
-        return !Strings.isNullOrEmpty(realName) ? Replaces.name(realName) : (!Strings.isNullOrEmpty(mobile)? Replaces.mobile(mobile) : (!Strings.isNullOrEmpty(email) ? email : (!Strings.isNullOrEmpty(userName) ? userName : nikeName)));
+        return !Strings.isNullOrEmpty(realName) ? Replaces.name(realName) : (!Strings.isNullOrEmpty(mobile)? Replaces.mobile(mobile) : (!Strings.isNullOrEmpty(email) ? email : (!Strings.isNullOrEmpty(userName) ? userName : nickName)));
+    }
+
+    public boolean isDisabled(){
+        return status != null && status == 0 ;
     }
 }

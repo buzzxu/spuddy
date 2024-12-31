@@ -56,7 +56,9 @@ public class JWTs {
         }
 
     }
-
+    public  int region(String token) {
+        return parse(token, "region", Integer.class);
+    }
     public <T> T parse(String token,String name,Class<T> clazz) throws TokenAuthException {
         try {
             DecodedJWT jwt = JWT.decode(token);
@@ -139,7 +141,6 @@ public class JWTs {
             throw ApplicationException.raise(ex);
         }
     }
-
 
     private String host(){
         return jwtConfig.isDef() ? jwtConfig.getIssuer() : request.getRemoteHost();

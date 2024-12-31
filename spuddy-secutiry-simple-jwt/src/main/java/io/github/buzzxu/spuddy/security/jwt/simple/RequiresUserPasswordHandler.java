@@ -16,7 +16,7 @@ import java.util.Optional;
  **/
 public abstract class RequiresUserPasswordHandler <U extends UserInfo> extends RequireUserHandler<U> {
 
-    public RequiresUserPasswordHandler(UserInfoService userInfoService) {
+    public RequiresUserPasswordHandler(UserInfoService<U> userInfoService) {
         super(userInfoService);
     }
 

@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.SecurityException;
 import java.math.BigInteger;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -116,13 +117,13 @@ public class StandardUser extends AbstractStandard implements UserService {
 //                checkArgument(!existedNikeName(userInfo.getNikeName()),"昵称已存在,请更换");
 //            }
             long time = Instant.now().getEpochSecond();
-            String sql = "INSERT INTO t_user_base(user_name,mobile,email,gender,password,salt,org_id,type,real_name,nike_name,avatar,source,verified,is_2fa,created_at,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?,0,0,?,?)";
+            String sql = "INSERT INTO t_user_base(user_name,mobile,email,gender,password,salt,org_id,type,real_name,nick_name,avatar,source,verified,is_2fa,created_at,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?,false,false,?,?)";
             long userId = qr.insert(sql, rs -> {
                 if (rs.next()) {
                     return rs.getLong(1);
                 }
                 return 0L;
-            }, userInfo.getUserName(), userInfo.getMobile(), userInfo.getEmail(), userInfo.getGender(), userInfo.getPassword(), userInfo.getSalt(), userInfo.getOrgId(), userInfo.getType(), userInfo.getRealName(), userInfo.getNikeName(), userInfo.getAvatar(), userInfo.getSource(), time, time);
+            }, userInfo.getUserName(), userInfo.getMobile(), userInfo.getEmail(), userInfo.getGender(), userInfo.getPassword(), userInfo.getSalt(), userInfo.getOrgId(), userInfo.getType(), userInfo.getRealName(), userInfo.getNickName(), userInfo.getAvatar(), userInfo.getSource(), time, time);
             userInfo.setId(userId);
             if (userInfo.getOAuthUser() != null ){
                 OAuthUser oAuthUser = userInfo.getOAuthUser();
@@ -142,7 +143,7 @@ public class StandardUser extends AbstractStandard implements UserService {
 
     private long queryCount(String column,Object value) throws SQLException {
         // 请查看示例 https://gist.github.com/retanoj/5fd369524a18ab68a4fe7ac5e0d121e8
-        return qr.query("SELECT COUNT(*) FROM t_user_base WHERE "+column+" = ? AND deleted = 0", new ScalarHandler<Long>(1), value);
+        return qr.query("SELECT COUNT(*) FROM t_user_base WHERE "+column+" = ? AND deleted = false ", new ScalarHandler<Long>(1), value);
     }
 
     @Transactional(rollbackFor = {ApplicationException.class, IllegalArgumentException.class})
@@ -152,7 +153,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         if (!(Patterns.userName(userName) || Patterns.userNameф(userName))) {
             throw new IllegalArgumentException(i18n("非法的用户名格式,请重新输入"));
         }
-        String sql = "INSERT INTO t_user_base(user_name,password,salt,type,source,verified,is_2fa,created_at,updated_at) values (?,?,?,?,?,0,0,?,?)";
+        String sql = "INSERT INTO t_user_base(user_name,password,salt,type,source,verified,is_2fa,created_at,updated_at) values (?,?,?,?,?,false,false,?,?)";
         return insert(sql, rs -> {
             try {
                 if (rs.next()) {
@@ -170,7 +171,7 @@ public class StandardUser extends AbstractStandard implements UserService {
             return Optional.empty();
         }, s -> {
             try {
-                return s.query("SELECT COUNT(*) FROM t_user_base WHERE user_name = ?  AND deleted = 0 ", new ScalarHandler<Long>(1), userName) > 0;
+                return s.query("SELECT COUNT(*) FROM t_user_base WHERE user_name = ?  AND deleted = false ", new ScalarHandler<Long>(1), userName) > 0;
             } catch (SQLException e) {
                 throw ApplicationException.raise(e);
             }
@@ -182,10 +183,10 @@ public class StandardUser extends AbstractStandard implements UserService {
     public <U extends User> long create(String userName, int type,UserSource source,Consumer<U> consumer,Class<U> clazz) {
         checkArgument(!Strings.isNullOrEmpty(userName),i18n("用户名不能为空"));
         long time = Instant.now().getEpochSecond();
-        String sql = "INSERT INTO t_user_base(user_name,type,source,verified,is_2fa,created_at,updated_at) values (?,?,?,0,0,?,?)";
+        String sql = "INSERT INTO t_user_base(user_name,type,source,verified,is_2fa,created_at,updated_at) values (?,?,?,false,false,?,?)";
         return insert0(sql, s -> {
             try {
-                return s.query("SELECT COUNT(*) FROM t_user_base WHERE user_name = ?  AND deleted = 0 ", new ScalarHandler<Long>(1), userName) > 0;
+                return s.query("SELECT COUNT(*) FROM t_user_base WHERE user_name = ?  AND deleted = false ", new ScalarHandler<Long>(1), userName) > 0;
             } catch (SQLException e) {
                 throw ApplicationException.raise(e);
             }
@@ -213,7 +214,7 @@ public class StandardUser extends AbstractStandard implements UserService {
     public <U extends User> long createByMobile(String mobile, String password, int type, UserSource source, Predicate<String> predicate, Consumer<U> consumer, Class<U> clazz) {
         checkArgument(!Strings.isNullOrEmpty(mobile) && !Strings.isNullOrEmpty(password),i18n("手机号或密码不能为空"));
         checkArgument(predicate.test(mobile),i18n("非法的手机号格式,请重新输入"));
-        String sql = "INSERT INTO t_user_base(mobile,password,salt,type,source,is_2fa,created_at,updated_at) values (?,?,?,?,?,0,?,?)";
+        String sql = "INSERT INTO t_user_base(mobile,password,salt,type,source,is_2fa,created_at,updated_at) values (?,?,?,?,?,false,?,?)";
         return insert(sql, rs -> {
             if (rs.next()) {
                 try {
@@ -231,7 +232,7 @@ public class StandardUser extends AbstractStandard implements UserService {
             return Optional.empty();
         }, s -> {
             try {
-                return s.query("SELECT COUNT(*) FROM t_user_base WHERE mobile = ? AND deleted = 0 ", new ScalarHandler<Long>(1), mobile) > 0;
+                return s.query("SELECT COUNT(*) FROM t_user_base WHERE mobile = ? AND deleted = false LIMIT 1 ", new ScalarHandler<Long>(1), mobile) > 0;
             } catch (SQLException e) {
                 throw ApplicationException.raise(e);
             }
@@ -244,14 +245,14 @@ public class StandardUser extends AbstractStandard implements UserService {
     @Override
     public <U extends User> long createByMobile(String mobile, int type,UserSource source,Consumer<U> consumer,Class<U> clazz) {
         checkArgument(!Strings.isNullOrEmpty(mobile),i18n("手机号不能为空"));
-        String sql = "INSERT INTO t_user_base(mobile,type,source,is_2fa,created_at,updated_at) values (?,?,?,0,?,?)";
+        String sql = "INSERT INTO t_user_base(mobile,type,source,is_2fa,created_at,updated_at) values (?,?,?,false,?,?)";
         if (!Patterns.mobile(mobile)) {
             throw new IllegalArgumentException(i18n("非法的手机号格式,请重新输入"));
         }
         long time = Instant.now().getEpochSecond();
         return insert0(sql, s -> {
             try {
-                return s.query("SELECT COUNT(*) FROM t_user_base WHERE mobile = ? AND deleted = 0", new ScalarHandler<Long>(1), mobile) > 0;
+                return s.query("SELECT COUNT(*) FROM t_user_base WHERE mobile = ? AND deleted = false LIMIT 1", new ScalarHandler<Long>(1), mobile) > 0;
             } catch (SQLException e) {
                 throw ApplicationException.raise(e);
             }
@@ -272,7 +273,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         if (!Patterns.email(email)) {
             throw new IllegalArgumentException(i18n("非法的Email格式,请重新输入"));
         }
-        String sql = "INSERT INTO t_user_base(email,password,salt,type,source,is_2fa,created_at,updated_at) values (?,?,?,?,?,0,?,?)";
+        String sql = "INSERT INTO t_user_base(email,password,salt,type,source,is_2fa,created_at,updated_at) values (?,?,?,?,?,false,?,?)";
         return insert(sql, rs -> {
             if (rs.next()) {
                 try {
@@ -290,7 +291,7 @@ public class StandardUser extends AbstractStandard implements UserService {
             return Optional.empty();
         }, s -> {
             try {
-                return s.query("SELECT COUNT(*) FROM t_user_base WHERE email = ? AND deleted = 0", new ScalarHandler<Long>(1), email) > 0;
+                return s.query("SELECT COUNT(*) FROM t_user_base WHERE email = ? AND deleted = false LIMIT 1", new ScalarHandler<Long>(1), email) > 0;
             } catch (SQLException e) {
                 throw ApplicationException.raise(e);
             }
@@ -301,14 +302,14 @@ public class StandardUser extends AbstractStandard implements UserService {
     @Override
     public <U extends User> long createByEmail(String email, int type,UserSource source,Consumer<U> consumer,Class<U> clazz) {
         checkArgument(!Strings.isNullOrEmpty(email),i18n("邮箱不能为空"));
-        String sql = "INSERT INTO t_user_base(email,type,source,is_2fa,created_at,updated_at) values (?,?,?,0,?,?)";
+        String sql = "INSERT INTO t_user_base(email,type,source,is_2fa,created_at,updated_at) values (?,?,?,false,?,?)";
         if (!Patterns.email(email)) {
             throw new IllegalArgumentException(i18n("非法的Email格式,请重新输入"));
         }
         long time = Instant.now().getEpochSecond();
         return insert0(sql, s -> {
             try {
-                return s.query("SELECT COUNT(*) FROM t_user_base WHERE email = ? AND deleted = 0", new ScalarHandler<Long>(1), email) > 0;
+                return s.query("SELECT COUNT(*) FROM t_user_base WHERE email = ? AND deleted = false LIMIT 1", new ScalarHandler<Long>(1), email) > 0;
             } catch (SQLException e) {
                 throw ApplicationException.raise(e);
             }
@@ -334,24 +335,24 @@ public class StandardUser extends AbstractStandard implements UserService {
             checkArgument(userId > 0,"必须传入用户ID");
             //清理基础表
             if(all){
-                if(qr.query("SELECT EXISTS (SELECT * FROM t_user_base WHERE id = ? )",new ScalarHandler<Long>(1),userId) > 0){
+                if(qr.query("SELECT COUNT(*) FROM t_user_base WHERE id = ? LIMIT 1",new ScalarHandler<Long>(1),userId) > 0){
                     if(qr.update("DELETE FROM t_user_base WHERE id=?",userId) == 0){
                         throw ApplicationException.raise("清理用户基础信息失败,userId=%d",userId);
                     }
                 }
             }else{
                 //逻辑删除
-                if(qr.update("UPDATE t_user_base SET status = 0,deleted = 1,updated_at=? WHERE id = ?",Instant.now().getEpochSecond(),userId) == 0){
+                if(qr.update("UPDATE t_user_base SET status = false,deleted = true,updated_at=? WHERE id = ?",Instant.now().getEpochSecond(),userId) == 0){
                     throw new IllegalArgumentException(i18n("清理账户基础信息失败")); //清理账户基础信息失败
                 }
             }
             //清理角色
             //用户角色不一定有关系，不强制校验
-            if(((Long)qr.query("SELECT EXISTS (SELECT * FROM t_user_role WHERE user_id = ?)",new ScalarHandler<>(1),userId)) > 0){
+            if(((Long)qr.query("SELECT COUNT(*) FROM t_user_role WHERE user_id = ? LIMIT 1",new ScalarHandler<>(1),userId)) > 0){
                 qr.update("DELETE FROM t_user_role WHERE user_id=?",userId);
             }
             //删除三方账户
-            if(((Long)qr.query("SELECT EXISTS (SELECT * FROM t_user_oauth WHERE user_id = ?)",new ScalarHandler<>(1),userId)) > 0){
+            if(((Long)qr.query("SELECT COUNT(*) FROM t_user_oauth WHERE user_id = ? LIMIT 1",new ScalarHandler<>(1),userId)) > 0){
                 if ( qr.update("DELETE FROM t_user_oauth WHERE user_id = ?",userId) == 0){
                     log.error("清理三方登录信息失败,userId=[{}}",userId);
                     throw ApplicationException.raise("清理三方登录信息失败[userId=%d]",userId);
@@ -478,7 +479,7 @@ public class StandardUser extends AbstractStandard implements UserService {
             }
             //先查询ID 和 密码
             try {
-                Object[] result = qr.query(sql + column + " AND deleted = 0", rs -> {
+                Object[] result = qr.query(sql + column + " AND deleted = false LIMIT 1", rs -> {
                     if (rs.next()) {
                         return new Object[]{rs.getLong(1), rs.getInt(2), rs.getInt(3)};
                     }
@@ -529,7 +530,7 @@ public class StandardUser extends AbstractStandard implements UserService {
             params.add(name);
             //先查询ID 和 密码
             try {
-                Object[] result = qr.query(sql + column + " AND deleted = 0", rs -> {
+                Object[] result = qr.query(sql + column + " AND deleted = false", rs -> {
                     if (rs.next()) {
                         return new Object[]{rs.getLong(1), rs.getInt(2), rs.getInt(3)};
                     }
@@ -627,7 +628,7 @@ public class StandardUser extends AbstractStandard implements UserService {
     private Optional<Long> loginVerify(String sql, String pwd, Object... params) throws LockedAccountException {
         try {
             //先查询ID 和 密码
-            Object[] result = qr.query(sql + " AND deleted = 0", rs -> {
+            Object[] result = qr.query(sql + " AND deleted = false", rs -> {
                 if (rs.next()) {
                     return new Object[]{rs.getLong(1), rs.getString(2), rs.getInt(3), rs.getInt(4)};
                 }
@@ -681,30 +682,11 @@ public class StandardUser extends AbstractStandard implements UserService {
 
     private <U extends User> Optional<U> load(String where ,Object value,Class<U> clazz){
         try {
-            return qr.query("SELECT id,org_id,user_name,mobile,email,gender,status,password,salt,real_name,nike_name,avatar,source,firstlogin,type,merge,is_2fa AS use2FA,2fa_secret AS secret2FA,created_at,updated_at FROM t_user_base WHERE " + where + " AND deleted = 0 ", rs -> {
+            return qr.query("SELECT id,org_id,user_name,mobile,email,gender,status,password,salt,real_name,nick_name,avatar,source,firstlogin,type,merge,is_2fa AS use2FA,secret_2fa AS secret2FA,created_at,updated_at FROM t_user_base WHERE " + where + " AND deleted = false ", rs -> {
                 try {
                     if (rs.next()) {
                         U val = clazz.getDeclaredConstructor().newInstance();
-                        val.setId(rs.getLong("id"));
-                        val.setOrgId(rs.getInt("org_id"));
-                        val.setUserName(rs.getString("user_name"));
-                        val.setMobile(rs.getString("mobile"));
-                        val.setEmail(rs.getString("email"));
-                        val.setGender(rs.getInt("gender"));
-                        val.setStatus(rs.getInt("status"));
-                        val.setPassword(rs.getString("password"));
-                        val.setSalt(rs.getString("salt"));
-                        val.setRealName(rs.getString("real_name"));
-                        val.setNikeName(rs.getString("nike_name"));
-                        val.setAvatar(rs.getString("avatar"));
-                        val.setSource(rs.getInt("source"));
-                        val.setFirstLogin(rs.getBoolean("firstlogin"));
-                        val.setType(rs.getInt("type"));
-                        val.setMerge(rs.getBoolean("merge"));
-                        val.setUse2FA(rs.getBoolean("use2FA"));
-                        val.setSecret2FA(rs.getString("secret2FA"));
-                        val.setCreatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("created_at"))));
-                        val.setUpdatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("updated_at"))));
+                        rowMapeer(val,rs);
                         return Optional.of(val);
                     }
                     return Optional.empty();
@@ -718,6 +700,29 @@ public class StandardUser extends AbstractStandard implements UserService {
         }catch (Exception e) {
             throw ApplicationException.raise(e);
         }
+    }
+
+    public static <U extends User> void rowMapeer(U val, ResultSet rs)throws SQLException{
+        val.setId(rs.getLong("id"));
+        val.setOrgId(rs.getInt("org_id"));
+        val.setUserName(rs.getString("user_name"));
+        val.setMobile(rs.getString("mobile"));
+        val.setEmail(rs.getString("email"));
+        val.setGender(rs.getInt("gender"));
+        val.setStatus(rs.getInt("status"));
+        val.setPassword(rs.getString("password"));
+        val.setSalt(rs.getString("salt"));
+        val.setRealName(rs.getString("real_name"));
+        val.setNickName(rs.getString("nick_name"));
+        val.setAvatar(rs.getString("avatar"));
+        val.setSource(rs.getInt("source"));
+        val.setFirstLogin(rs.getBoolean("firstlogin"));
+        val.setType(rs.getInt("type"));
+        val.setMerge(rs.getBoolean("merge"));
+        val.setUse2FA(rs.getBoolean("use2FA"));
+        val.setSecret2FA(rs.getString("secret2FA"));
+        val.setCreatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("created_at"))));
+        val.setUpdatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("updated_at"))));
     }
 
     
@@ -748,7 +753,7 @@ public class StandardUser extends AbstractStandard implements UserService {
 
     @Override
     public Optional<String> nickName(long userId) {
-        return column(userId,"nike_name");
+        return column(userId,"nick_name");
     }
 
     @Override
@@ -759,7 +764,7 @@ public class StandardUser extends AbstractStandard implements UserService {
     @Override
     public <T> Optional<T> column(long userId, String column){
         try {
-            return Optional.ofNullable(qr.query("SELECT " +column+ " FROM t_user_base WHERE id = ? AND deleted = 0", new ScalarHandler<>(1), userId));
+            return Optional.ofNullable(qr.query("SELECT " +column+ " FROM t_user_base WHERE id = ? AND deleted = false", new ScalarHandler<>(1), userId));
         } catch (SQLException e) {
             throw ApplicationException.raise(e);
         }
@@ -784,13 +789,13 @@ public class StandardUser extends AbstractStandard implements UserService {
                 log.error("用户[id={}]信息无法获取，或状态异常,中止合并账户", target.getId());
                 throw ApplicationException.argument("基础信息异常,中止合并账户", target.getId());
             }
-            if (qr.update("UPDATE t_user_base SET org_id=?,type = ?,user_name = ?,mobile=?,email=?,nike_name=?,real_name=?,avatar=?,status=?,gender=?,firstlogin=?,merge=true,is_2fa=?,2fa_secret=?,updated_at=? WHERE id = ? AND merge = false "
+            if (qr.update("UPDATE t_user_base SET org_id=?,type = ?,user_name = ?,mobile=?,email=?,nick_name=?,real_name=?,avatar=?,status=?,gender=?,firstlogin=?,merge=true,is_2fa=?,secret_2fa=?,updated_at=? WHERE id = ? AND merge = false "
                     , target.getOrgId()
                     , target.getType()
                     , target.getUserName()
                     , target.getMobile()
                     , target.getEmail()
-                    , target.getNikeName()
+                    , target.getNickName()
                     , target.getRealName()
                     , target.getAvatar()
                     , target.getStatus()
@@ -826,7 +831,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         }
         isDisableThrow(userId);
         try {
-            Object[] salt$Pwd = qr.query("SELECT salt,password FROM t_user_base WHERE id=?", new ArrayHandler(), userId);
+            Object[] salt$Pwd = qr.query("SELECT salt,password FROM t_user_base WHERE id=? LIMIT 1", new ArrayHandler(), userId);
             String salt = salt$Pwd[0] == null ? null : (String) salt$Pwd[0], oldEncry = salt$Pwd[1] == null ? null : (String) salt$Pwd[1];
             if (Strings.isNullOrEmpty(salt) || Strings.isNullOrEmpty(oldEncry)) {
                 throw ApplicationException.raise("无法获取加密数据");
@@ -897,7 +902,7 @@ public class StandardUser extends AbstractStandard implements UserService {
     @Override
     public boolean existedNickName(String name) {
         try {
-            return queryCount("nike_name",name) > 0;
+            return queryCount("nick_name",name) > 0;
         } catch (SQLException e) {
             throw ApplicationException.raise(e);
         }
@@ -927,7 +932,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         } else {
             sql += " user_name = ? ";
         }
-        sql += " AND deleted = 0";
+        sql += " AND deleted = false";
         try {
             Long count = qr.query(sql, new ScalarHandler<>(1), name);
             return count != null && count > 0;
@@ -947,7 +952,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         } else {
             sql += " user_name = ? ";
         }
-        sql += " AND deleted = 0";
+        sql += " AND deleted = false";
         try {
             Long count = qr.query(sql, new ScalarHandler<>(1), type, name);
             return count != null && count > 0;
@@ -983,7 +988,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         } else {
             sql += " user_name = ? ";
         }
-        sql += " AND deleted = 0";
+        sql += " AND deleted = false";
         params.add(name);
         try {
             Long count = qr.query(sql, new ScalarHandler<>(1), params.toArray(new Object[params.size()]));
@@ -1044,7 +1049,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         } else {
             where += " user_name = ? ";
         }
-        where += " AND deleted = 0";
+        where += " AND deleted = false";
         try {
             long c = qr.query(count+ where, new ScalarHandler<>(1), name);
             if(c == 0){
@@ -1153,7 +1158,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         } else {
             sql += " user_name = ? ";
         }
-        sql += " AND deleted = 0";
+        sql += " AND deleted = false";
         try {
             return Optional.ofNullable(qr.query(sql, new ScalarHandler<>(1), name));
         } catch (SQLException e) {
@@ -1179,7 +1184,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         } else {
             sql += " user_name = ? ";
         }
-        sql += " AND deleted = 0";
+        sql += " AND deleted = false";
         try {
             return Optional.ofNullable(qr.query(sql, new ScalarHandler<>(1), name));
         } catch (SQLException e) {
@@ -1288,8 +1293,8 @@ public class StandardUser extends AbstractStandard implements UserService {
         if (userInfo.getSource() != 0 && userInfo.getSource() != old.getSource()) {
             params.put("source",userInfo.getSource());
         }
-        if( !Strings.isNullOrEmpty(userInfo.getNikeName()) && !StringUtils.equals(old.getNikeName(),userInfo.getNikeName())){
-            params.put("nike_name",userInfo.getNikeName());
+        if( !Strings.isNullOrEmpty(userInfo.getNickName()) && !StringUtils.equals(old.getNickName(),userInfo.getNickName())){
+            params.put("nick_name",userInfo.getNickName());
         }
         try {
             if(params.isEmpty()) {
@@ -1348,7 +1353,7 @@ public class StandardUser extends AbstractStandard implements UserService {
     public <U extends User> Optional<U> of(String oauthId, String unionid, OAuthType type, Class<U> clazz) {
         checkArgument(OAuthType.UNKNOWN != type ,"请确认三方平台");
         checkArgument(!Strings.isNullOrEmpty(oauthId) || !Strings.isNullOrEmpty(unionid),"请传入三方登录凭证");
-        String sql = "SELECT uo.id AS oId,uo.user_id,uo.type AS oType,uo.oauth_id,uo.unionid,uo.credential,uo.created_at AS createdAt,ub.id,ub.type,ub.user_name,ub.mobile,ub.email,ub.password,ub.salt,ub.nike_name,ub.real_name,ub.avatar,ub.status,ub.gender,ub.source,ub.firstlogin,ub.merge,ub.is_2fa AS use2FA,ub.2fa_secret AS secret2FA,ub.created_at,ub.updated_at  FROM t_user_base ub JOIN t_user_oauth uo ON ub.id = uo.user_id WHERE uo.type = ?  ";
+        String sql = "SELECT uo.id AS oId,uo.user_id,uo.type AS oType,uo.oauth_id,uo.unionid,uo.credential,uo.created_at AS createdAt,ub.id,ub.type,ub.user_name,ub.mobile,ub.email,ub.password,ub.salt,ub.nick_name,ub.real_name,ub.avatar,ub.status,ub.gender,ub.source,ub.firstlogin,ub.merge,ub.is_2fa AS use2FA,ub.secret_2fa AS secret2FA,ub.created_at,ub.updated_at  FROM t_user_base ub JOIN t_user_oauth uo ON ub.id = uo.user_id WHERE uo.type = ?  ";
         List<Object> params = Lists.newArrayListWithCapacity(3);
         params.add(type.type());
         if(!Strings.isNullOrEmpty(oauthId)){
@@ -1359,7 +1364,7 @@ public class StandardUser extends AbstractStandard implements UserService {
             sql += " AND uo.unionid = ? ";
             params.add(unionid);
         }
-        sql += " AND ub.deleted = 0";
+        sql += " AND ub.deleted = false";
         try {
             return qr.query(sql,rs->{
                 if(rs.next()){
@@ -1387,7 +1392,7 @@ public class StandardUser extends AbstractStandard implements UserService {
                     user.setEmail(rs.getString("email"));
                     user.setPassword(rs.getString("password"));
                     user.setSalt(rs.getString("salt"));
-                    user.setNikeName(rs.getString("nike_name"));
+                    user.setNickName(rs.getString("nick_name"));
                     user.setRealName(rs.getString("real_name"));
                     user.setAvatar(rs.getString("avatar"));
                     user.setStatus(rs.getInt("status"));
@@ -1557,7 +1562,7 @@ public class StandardUser extends AbstractStandard implements UserService {
             }else{
                 qr.insert("INSERT INTO t_user_info (user_id,real_name,identity_no) values (?,?,?)",rs->null,userId,verified.getRealName().strip(),verified.getIdentityNo().strip());
             }
-            if(qr.update("UPDATE t_user_base SET verified = 1,updated_at = ? WHERE  id = ?",Instant.now().getEpochSecond(),userId) == 0){
+            if(qr.update("UPDATE t_user_base SET verified = true,updated_at = ? WHERE  id = ?",Instant.now().getEpochSecond(),userId) == 0){
                 throw new IllegalArgumentException("已实名认证状态修改失败,请稍后尝试");
             }
         } catch (SQLException e) {
@@ -1566,9 +1571,77 @@ public class StandardUser extends AbstractStandard implements UserService {
 
     }
 
+    @Override
+    public Optional<PrivilegeInfo>  pvgInfo(long userId) {
+        String sql =
+                """
+                                SELECT
+                                    ub.id,
+                                    ub.org_id,
+                                    ub.user_name,
+                                    ub.mobile,
+                                    ub.type,
+                                    ub.email,
+                                    ub.gender,
+                                    ub.real_name,
+                                    ub.source,
+                                    ub.avatar,
+                                    STRING_AGG(DISTINCT CAST(r.id AS VARCHAR), ',') AS roleIds,
+                                    STRING_AGG(DISTINCT r.code, ',') AS roleCodes,
+                                    STRING_AGG(DISTINCT CAST(p.id AS VARCHAR), ',') AS permIds,
+                                    STRING_AGG(DISTINCT p.code, ',') AS permCodes
+                                FROM
+                                    t_user_base ub
+                                    LEFT JOIN t_user_role ur ON ub.id = ur.user_id
+                                    LEFT JOIN t_role r ON ur.role_id = r.id
+                                    LEFT JOIN t_role_permisson rp ON r.id = rp.role_id
+                                    LEFT JOIN t_permisson p ON rp.permisson_id = p.id
+                                WHERE
+                                    ub.id = ?
+                                GROUP BY
+                                    ub.id
+                        """;
+        try {
+            return  qr.query(sql,rs->{
+                if(rs.next()){
+                    PrivilegeInfo val = new PrivilegeInfo();
+                    val.setId(userId);
+                    val.setOrgId(rs.getInt("org_id"));
+                    val.setUserName(rs.getString("user_name"));
+                    val.setMobile(rs.getString("mobile"));
+                    val.setType(rs.getInt("type"));
+                    val.setEmail(rs.getString("email"));
+                    val.setGender(rs.getInt("gender"));
+                    val.setRealName(rs.getString("real_name"));
+                    val.setSource(rs.getInt("source"));
+                    val.setAvatar(rs.getString("avatar"));
+                    var roleIds = rs.getString("roleIds");
+                    if(!Strings.isNullOrEmpty(roleIds)){
+                        Splitter.on(",").split(roleIds).forEach(val::addRoleId);
+                    }
+                    var roleCodes = rs.getString("roleCodes");
+                    if(!Strings.isNullOrEmpty(roleCodes)){
+                        Splitter.on(",").split(roleCodes).forEach(val::addRole);
+                    }
+                    var permIds = rs.getString("permIds");
+                    if(!Strings.isNullOrEmpty(permIds)){
+                        Splitter.on(",").split(permIds).forEach(val::addPermIds);
+                    }
+                    var permCodes = rs.getString("permCodes");
+                    if(!Strings.isNullOrEmpty(permCodes)){
+                        Splitter.on(",").split(permCodes).forEach(val::addPermissions);
+                    }
+                    return Optional.of(val);
+                }
+                return Optional.empty();
+            },userId);
+        } catch (Exception e) {
+            throw ApplicationException.raise(e);
+        }
+    }
     private boolean exist(String column, Object val){
         try {
-            Long count = qr.query("SELECT COUNT(*) FROM t_user_base WHERE " + column + " =? AND deleted = 0 ", new ScalarHandler<>(1), val);
+            Long count = qr.query("SELECT COUNT(*) FROM t_user_base WHERE " + column + " =? AND deleted = false ", new ScalarHandler<>(1), val);
             return count > 0;
         } catch (SQLException e) {
             throw ApplicationException.raise(e);
@@ -1576,7 +1649,7 @@ public class StandardUser extends AbstractStandard implements UserService {
     }
     private boolean exist(Long id,String column,Object val){
         try {
-            Long count = qr.query("SELECT COUNT(*) FROM t_user_base WHERE id != ? AND " + column + " =? AND deleted = 0 ", new ScalarHandler<>(1), id,val);
+            Long count = qr.query("SELECT COUNT(*) FROM t_user_base WHERE id != ? AND " + column + " =? AND deleted = false ", new ScalarHandler<>(1), id,val);
             return count > 0;
         } catch (SQLException e) {
             throw ApplicationException.raise(e);

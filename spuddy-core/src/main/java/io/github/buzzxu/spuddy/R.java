@@ -14,8 +14,6 @@ public class R<T> {
     @Getter
     private final boolean error;
     @Getter
-    private String key;
-    @Getter
     private String message;
     @Getter
     private T data;
@@ -57,11 +55,7 @@ public class R<T> {
         return new R<>(code,null);
     }
 
-    @SuppressWarnings("rawtypes")
-    public R key(String key){
-        this.key = key;
-        return this;
-    }
+
     @SuppressWarnings("rawtypes")
     public R message(String message){
         this.message = message;

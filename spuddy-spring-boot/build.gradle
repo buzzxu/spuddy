@@ -1,10 +1,9 @@
 ext{
-    undertowVersion="2.3.18.Final"
     jbossLoggingVersion = "3.4.3.Final"
 }
 dependencies {
     api project(':spuddy-core')
-
+    api("jakarta.servlet:jakarta.servlet-api:$servletVersion")
     api("org.springframework:spring-webmvc")
     api("org.springframework.boot:spring-boot-starter-web"){
         exclude(module:"spring-boot-starter-tomcat")
