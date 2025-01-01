@@ -58,24 +58,6 @@ public class JdbcConfig {
         };
         this.autoCommit = autoCommit;
         this.readOnly = readOnly;
-        //重写实现分页sql
-        rewritePageSql(url);
     }
 
-
-
-
-    private static void rewritePageSql(String url){
-        try {
-            ClassPool cp = ClassPool.getDefault();
-            cp.insertClassPath(new ClassClassPath(JdbcConfig.class));
-            CtClass cc=cp.get("io.github.buzzxu.spuddy.util.Pagination");
-            cc.addField(CtField.make( "private static final io.github.buzzxu.spuddy.db.DBType dbType;",cc),CtField.Initializer.byExpr("io.github.buzzxu.spuddy.db.DBType.PARSER(\""+url+"\");"));
-            CtMethod cm=cc.getDeclaredMethod("rewritePageSql");
-            cm.setBody("return dbType.rewritePageSql($$);");
-            cc.toClass();
-        }catch (Exception ex){
-            throw new StartupException(ex);
-        }
-    }
 }

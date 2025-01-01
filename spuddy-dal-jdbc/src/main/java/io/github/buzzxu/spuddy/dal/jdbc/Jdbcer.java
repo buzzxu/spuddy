@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import io.github.buzzxu.spuddy.dal.jdbc.handlers.Map2BeanHander;
 import io.github.buzzxu.spuddy.exceptions.ApplicationException;
 import io.github.buzzxu.spuddy.objects.Pager;
-import io.github.buzzxu.spuddy.util.Pagination;
+import io.github.buzzxu.spuddy.db.Pagination;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;

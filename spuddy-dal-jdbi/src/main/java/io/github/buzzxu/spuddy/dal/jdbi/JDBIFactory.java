@@ -50,7 +50,7 @@ public class JDBIFactory {
     }
 
     public Jdbi build(List<JdbiPlugin> plugins, DataSource dataSource, Env env,Environment environment, JdbcConfig mainEnv, String name) {
-        dynamicClass(env,mainEnv);
+//        dynamicClass(env,mainEnv);
         final Jdbi jdbi = Jdbi.create(new ConnectionFactory() {
             @Override
             public Connection openConnection() throws SQLException {
@@ -206,57 +206,5 @@ public class JDBIFactory {
                 return (position, statement, ctx) -> statement.setString(position,Jackson.object2Json(value));
             }
         });
-    }
-    private void dynamicClass(Env env,JdbcConfig mainEnv){
-        try {
-            env.logger().info("JDBI Pagination bytecode write");
-            env.logger().info("Database is {}",mainEnv.getDbType().name());
-            String dsType = System.getProperty("dsType","hikari");
-            ClassPool cp = ClassPool.getDefault();
-            cp.insertClassPath(new ClassClassPath(this.getClass()));
-            String cls = "io.github.buzzxu.spuddy.dal.jdbi.JdbiUtil";
-            CtClass cc=cp.get(cls);
-            CtMethod cm=cc.getDeclaredMethod("getRawSql");
-            String body;
-            switch (mainEnv.getDbType()){
-                case MYSQL:{
-                    body = """
-                                {
-                                    Object obj = org.apache.commons.lang3.reflect.FieldUtils.readField($1,"delegate",true);
-                                    if (obj instanceof com.mysql.cj.jdbc.ClientPreparedStatement){
-                                        com.mysql.cj.jdbc.ClientPreparedStatement ps = (com.mysql.cj.jdbc.ClientPreparedStatement)obj;
-                                        return ((com.mysql.cj.PreparedQuery)org.apache.commons.lang3.reflect.FieldUtils.readField(ps,"query",true)).asSql();
-                                    }else{
-                                        com.mysql.cj.jdbc.ServerPreparedStatement ps = (com.mysql.cj.jdbc.ServerPreparedStatement)obj;
-                                        return ((com.mysql.cj.PreparedQuery)ps.getQuery()).asSql();
-                                    }
-                                }
-                                """;
-                    break;
-                }
-                case POSTGRESQL: {
-                    body = """
-                            {
-                                Object obj = org.apache.commons.lang3.reflect.FieldUtils.readField($1, "delegate", true);
-                                if (obj instanceof org.postgresql.jdbc.PgPreparedStatement) {
-                                    org.postgresql.jdbc.PgPreparedStatement ps = (org.postgresql.jdbc.PgPreparedStatement) obj;
-                                    return ps.toString();
-                                } else {
-                                    throw new UnsupportedOperationException("Unsupported PreparedStatement type for PostgreSQL");
-                                }
-                            }
-                            """;
-                    break;
-                }
-                default:
-                    body = "return ((com.mysql.cj.PreparedQuery)((com.mysql.cj.jdbc.ServerPreparedStatement) org.apache.commons.lang3.reflect.FieldUtils.readField($1,\"delegate\",true)).getQuery()).asSql();";
-            }
-            cm.setBody(body);
-            cc.toClass();
-            env.logger().info("Override getRawSql method of {} using javassit",cls);
-        }catch (Exception ex){
-            throw new StartupException(ex);
-        }
-
     }
 }

@@ -2,7 +2,7 @@ package io.github.buzzxu.spuddy.dal.jdbi;
 
 import com.google.common.collect.Sets;
 import io.github.buzzxu.spuddy.objects.Pager;
-import io.github.buzzxu.spuddy.util.Pagination;
+import io.github.buzzxu.spuddy.db.Pagination;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -75,7 +75,7 @@ public class JdbiUtil {
     }
 
     public static String getRawSql(PreparedStatement stmt){
-        throw new UnsupportedOperationException();
+        return stmt.toString();
     }
 
     public static <T> String DefalutPageineRawSql(String sql, Pager<T> pager){

@@ -11,8 +11,11 @@ dependencies {
     }
     api("org.jdbi:jdbi3-sqlobject")
     api("org.jdbi:jdbi3-caffeine-cache")
+    api ("org.jdbi:jdbi3-postgres"){
+        exclude (module:"postgresql")
+    }
+    api ("org.postgresql:postgresql:$postgresqlVersion")
 
     testImplementation ("org.springframework:spring-test")
-    testImplementation ("org.postgresql:postgresql:$postgresqlVersion")
     testImplementation "com.zaxxer:HikariCP:$hikariCPVersion"
 }

@@ -1,8 +1,8 @@
-package io.github.buzzxu.spuddy.util;
+package io.github.buzzxu.spuddy.db;
 
 public final class Pagination {
 
     public static String rewritePageSql(String sql,int number,int size){
-        throw new UnsupportedOperationException();
+        return DBType.POSTGRESQL.rewritePageSql(sql,number,size);
     }
 }

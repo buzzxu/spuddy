@@ -1,7 +1,7 @@
 package io.github.buzzxu.spuddy.dal;
 
 
-import io.github.buzzxu.spuddy.util.Pagination;
+import io.github.buzzxu.spuddy.db.Pagination;
 import lombok.Getter;
 import lombok.Setter;
 
