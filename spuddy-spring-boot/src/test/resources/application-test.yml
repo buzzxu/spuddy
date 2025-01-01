@@ -1,7 +1,7 @@
 
 redis:
-  url: 47.100.7.136:10379
-  password: MNBV7QCvX9YX&UK8xu #MNBV7QCvX9YX&UK8
+  url: 47.100.6.136:10379
+  password: MNBV7QCvX9YX&UK8
   database: 15
   pool:
     min-idle: 500
@@ -11,6 +11,6 @@ redis:
 db:
   connection:
     username: jd_devel
-    password: Mn2996Pgd1YgqsPNNAXu
+    password: Mn2996Pgd1YgqsPNNAXu#1
     url: jdbc:postgresql://pgm-uf6713x8gfi411gdio.pg.rds.aliyuncs.com:5432/jt
     driver-class-name: org.postgresql.Driver
