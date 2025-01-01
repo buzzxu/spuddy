@@ -55,7 +55,7 @@ public abstract class AbstractUserInfoService<U extends UserInfo> implements Use
             throw new SecurityException("无法获取身份信息",401);
         }
         Optional<UserInfo> user = redis.execute(redis->{
-            String key = USER_INFO.to(type,userId);
+            String key = USER_INFO.to(userId);
             if(redis.exists(key)){
                 Map<String,String> data = redis.hgetAll(key);
                 if(!data.containsKey("type")) {
@@ -71,7 +71,7 @@ public abstract class AbstractUserInfoService<U extends UserInfo> implements Use
             //查询
             UserInfo userInfo = supplier.get();
             if(userInfo != null){
-                String key$info = USER_INFO.to(type,userId);
+                String key$info = USER_INFO.to(userId);
                 redis.execute(redis->{
                     //保存用户信息
                     redis.hmset(key$info,userInfo.map());
