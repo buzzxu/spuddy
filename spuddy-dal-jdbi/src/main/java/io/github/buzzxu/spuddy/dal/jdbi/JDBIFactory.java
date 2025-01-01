@@ -50,7 +50,6 @@ public class JDBIFactory {
     }
 
     public Jdbi build(List<JdbiPlugin> plugins, DataSource dataSource, Env env,Environment environment, JdbcConfig mainEnv, String name) {
-//        dynamicClass(env,mainEnv);
         final Jdbi jdbi = Jdbi.create(new ConnectionFactory() {
             @Override
             public Connection openConnection() throws SQLException {
@@ -111,25 +110,25 @@ public class JDBIFactory {
         jdbi.registerColumnMapper(new GenericType<Map<String, Object>>() {
         }, (r, columnNumber, ctx) -> {
             String val = r.getString(columnNumber);
-            return Strings.isNullOrEmpty(val) ? Collections.EMPTY_MAP : Jackson.json2Map(val);
+            return Strings.isNullOrEmpty(val) ? null : Jackson.json2Map(val);
         });
         jdbi.registerColumnMapper(new GenericType<List<String>>() {
         }, (r, columnNumber, ctx) -> {
             String val = r.getString(columnNumber);
-            return Strings.isNullOrEmpty(val) ? Collections.EMPTY_LIST : Jackson.isJSON(val) ? Jackson.json2Object(val, new TypeReference<List<String>>() {
+            return Strings.isNullOrEmpty(val) ? null : Jackson.isJSON(val) ? Jackson.json2Object(val, new TypeReference<List<String>>() {
             }) : Splitter.on(",").splitToList(val);
         });
         jdbi.registerColumnMapper(new GenericType<List<Integer>>() {
         }, (r, columnNumber, ctx) -> {
             String val = r.getString(columnNumber);
-            return Strings.isNullOrEmpty(val) ? Collections.EMPTY_LIST :  Jackson.isJSON(val) ? Jackson.json2Object(val, new TypeReference<List<Integer>>() {
-            }) : Splitter.on(",").splitToStream(val).map(v-> Integer.valueOf(v)).collect(Collectors.toList());
+            return Strings.isNullOrEmpty(val) ? null :  Jackson.isJSON(val) ? Jackson.json2Object(val, new TypeReference<List<Integer>>() {
+            }) : Splitter.on(",").splitToStream(val).map(Integer::valueOf).collect(Collectors.toList());
         });
         jdbi.registerColumnMapper(new GenericType<List<Long>>() {
         }, (r, columnNumber, ctx) -> {
             String val = r.getString(columnNumber);
-            return Strings.isNullOrEmpty(val) ? Collections.EMPTY_LIST : Jackson.isJSON(val) ? Jackson.json2Object(val, new TypeReference<List<Long>>() {
-            }): Splitter.on(",").splitToStream(val).map(v-> Long.valueOf(v)).collect(Collectors.toList());
+            return Strings.isNullOrEmpty(val) ? null : Jackson.isJSON(val) ? Jackson.json2Object(val, new TypeReference<List<Long>>() {
+            }): Splitter.on(",").splitToStream(val).map(Long::valueOf).collect(Collectors.toList());
         });
 
         jdbi.registerColumnMapper(new GenericType<String[]>(){}, (r, columnNumber, ctx) -> {
@@ -138,11 +137,11 @@ public class JDBIFactory {
         });
         jdbi.registerColumnMapper(new GenericType<Integer[]>(){},(r, columnNumber, ctx) -> {
             String val = r.getString(columnNumber);
-            return Strings.isNullOrEmpty(val) ? null : Jackson.isJSON(val) ? Jackson.json2Object(val,Integer[].class) :Splitter.on(",").splitToStream(val).map(v-> Long.valueOf(v)).toArray(Integer[]::new);
+            return Strings.isNullOrEmpty(val) ? null : Jackson.isJSON(val) ? Jackson.json2Object(val,Integer[].class) :Splitter.on(",").splitToStream(val).map(Integer::valueOf).toArray(Integer[]::new);
         });
         jdbi.registerColumnMapper(new GenericType<Long[]>(){},(r, columnNumber, ctx) -> {
             String val = r.getString(columnNumber);
-            return Strings.isNullOrEmpty(val) ? null : Jackson.isJSON(val) ? Jackson.json2Object(val,Long[].class) :Splitter.on(",").splitToStream(val).map(v-> Long.valueOf(v)).toArray(Long[]::new);
+            return Strings.isNullOrEmpty(val) ? null : Jackson.isJSON(val) ? Jackson.json2Object(val,Long[].class) :Splitter.on(",").splitToStream(val).map(Long::valueOf).toArray(Long[]::new);
         });
 
         jdbi.registerArgument(new AbstractArgumentFactory<List<IdName>>(Types.VARCHAR) {
