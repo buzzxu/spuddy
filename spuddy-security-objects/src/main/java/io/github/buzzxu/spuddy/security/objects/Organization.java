@@ -91,7 +91,7 @@ public class Organization extends Id<Integer> implements Tree<Integer> {
 
     @Override
     public int id() {
-        return id.intValue();
+        return id;
     }
 
     @Override

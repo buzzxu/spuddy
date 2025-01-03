@@ -19,7 +19,7 @@ public class R<T> {
     private T data;
 
     private R(){
-        this(0);
+        this(200);
     }
     private R(int code){
         this(code,null);
@@ -27,7 +27,7 @@ public class R<T> {
     private R(int code, String message){
         this.code = code;
         this.message = message;
-        this.error = this.code > 0;
+        this.error = this.code > 200;
     }
     @SuppressWarnings("unchecked")
     public static <T> R<T> of(T data){
