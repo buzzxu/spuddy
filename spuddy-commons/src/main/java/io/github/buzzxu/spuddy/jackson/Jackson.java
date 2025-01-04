@@ -80,7 +80,7 @@ public enum Jackson implements JSON{
 
             mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             mapper.setSubtypeResolver(new DiscoverableSubtypeResolver());
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             //序列化BigDecimal时不使用科学计数法输出
             mapper.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
