@@ -31,6 +31,6 @@ public class JDBIConfigure {
     @DependsOn("mainDataSource")
     @Bean
     public Jdbi dbi(@Autowired(required = false) List<JdbiPlugin> plugins, DataSource dataSource,Env env, Environment environment){
-        return new JDBIFactory().build(plugins,dataSource, env,environment,mainEnv,"yuanmai-jdbi");
+        return new JDBIFactory().build(plugins,dataSource, env,environment,mainEnv,"spuddy-jdbi");
     }
 }
