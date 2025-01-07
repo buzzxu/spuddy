@@ -22,4 +22,5 @@ include 'spuddy-dal-jdbc'
 include 'spuddy-security-shiro-jwt'
 include 'spuddy-security-account'
 include 'spuddy-security-boss'
+include 'spuddy-thirdparty'
 

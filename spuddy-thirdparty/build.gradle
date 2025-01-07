@@ -1,0 +1,9 @@
+dependencies {
+    api project(':spuddy-core')
+
+    compileOnly("org.springframework:spring-web")
+    compileOnly("com.auth0:java-jwt:$jwtVersion"){
+        exclude(group:"com.fasterxml.jackson.core")
+        exclude(module:"commons-codec")
+    }
+}
