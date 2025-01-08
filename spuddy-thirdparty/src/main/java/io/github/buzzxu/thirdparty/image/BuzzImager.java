@@ -147,7 +147,7 @@ public class BuzzImager {
                 throw new ImageException(jsonNode.findValue("message").asText(),500);
             }
             JsonNode fileNode = jsonNode.findValue("file");
-            if(fileNode.isArray()){
+            if(fileNode.isArray() && file != null){
                 List<String> files = Lists.newArrayListWithCapacity(file.length);
                 for (JsonNode node : fileNode) {
                     files.add(node.asText());
