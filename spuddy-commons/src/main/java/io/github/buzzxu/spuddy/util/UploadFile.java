@@ -20,6 +20,7 @@ public class UploadFile {
     private InputStream file;
     private byte[] content;
     private String extension;
+    private boolean rename;
 
     private UploadFile(String fileName, InputStream file) {
         this(fileName,file,true);
@@ -29,7 +30,10 @@ public class UploadFile {
         this.fileName = fileName;
         this.file = file;
         fileExtension();
-        rename();
+        this.rename = rename;
+        if(rename){
+            rename();
+        }
     }
 
     public UploadFile(String fileName, byte[] content){
@@ -39,6 +43,7 @@ public class UploadFile {
         checkArgument(!Strings.isNullOrEmpty(fileName),"Null filename used");
         this.fileName = fileName;
         this.content = content;
+        this.rename = rename;
         fileExtension();
         if(rename){
             rename();

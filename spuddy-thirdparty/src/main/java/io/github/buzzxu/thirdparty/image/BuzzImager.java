@@ -110,6 +110,7 @@ public class BuzzImager {
                     var contentType = MediaType.parse(CONTENT_TYPE.getOrDefault(suffix, "io/github/buzzxu/thirdparty/image/jpeg"));
                     body.addFormDataPart("file",f.getFileName(),
                             f.getContent() != null ? RequestBody.create(f.getContent(),contentType) : createBinaryBody(contentType,f.getFile()));
+                    body.addFormDataPart("rename", String.valueOf(f.isRename()));
                 }
             }
             if(consumer != null){
