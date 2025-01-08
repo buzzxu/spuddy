@@ -40,13 +40,13 @@ public class BuzzImager {
     private static final OnlyOnceCondition once = OnlyOnceCondition.create("图片服务只能初始化一次");
 
     static {
-        CONTENT_TYPE.put("jpg", "io/github/buzzxu/thirdparty/image/jpeg");
-        CONTENT_TYPE.put("jpeg", "io/github/buzzxu/thirdparty/image/jpeg");
-        CONTENT_TYPE.put("gif", "io/github/buzzxu/thirdparty/image/gif");
-        CONTENT_TYPE.put("png", "io/github/buzzxu/thirdparty/image/png");
-        CONTENT_TYPE.put("webp", "io/github/buzzxu/thirdparty/image/webp");
-        CONTENT_TYPE.put("heic", "io/github/buzzxu/thirdparty/image/heic");
-        CONTENT_TYPE.put("heif", "io/github/buzzxu/thirdparty/image/heif");
+        CONTENT_TYPE.put("jpg", "image/jpeg");
+        CONTENT_TYPE.put("jpeg", "image/jpeg");
+        CONTENT_TYPE.put("gif", "image/gif");
+        CONTENT_TYPE.put("png", "image/png");
+        CONTENT_TYPE.put("webp", "image/webp");
+        CONTENT_TYPE.put("heic", "image/heic");
+        CONTENT_TYPE.put("heif", "image/heif");
     }
 
     public BuzzImager(String url, String secret) {
@@ -107,7 +107,7 @@ public class BuzzImager {
                     checkArgument(f.getFile() != null || f.getContent() != null ,"必须传入图片内容");
                     String suffix = f.getExtension();
                     checkArgument(CONTENT_TYPE.containsKey(suffix.toLowerCase()),"不支持"+suffix+"格式图片上传");
-                    var contentType = MediaType.parse(CONTENT_TYPE.getOrDefault(suffix, "io/github/buzzxu/thirdparty/image/jpeg"));
+                    var contentType = MediaType.parse(CONTENT_TYPE.getOrDefault(suffix, "image/jpeg"));
                     body.addFormDataPart("file",f.getFileName(),
                             f.getContent() != null ? RequestBody.create(f.getContent(),contentType) : createBinaryBody(contentType,f.getFile()));
                     body.addFormDataPart("rename", String.valueOf(f.isRename()));
