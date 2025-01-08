@@ -31,8 +31,23 @@ public class BuzzUploadImager implements UploadImager{
         }
     }
 
+    @Override
+    public String upload(String folder, MultipartFile file, boolean rename, boolean webp) {
+        try {
+            return upload(folder, UploadFile.of(file.getOriginalFilename(),file.getBytes(),rename),webp);
+        } catch (IOException e) {
+            log.error("上传失败，原因:{}",e.getMessage(),e);
+            throw ApplicationException.notifyUser("上传图片失败,请稍后再试或联系管理员");
+        }
+    }
+
     public String upload(String folder,String fileName, byte[] data){
         return upload(folder,UploadFile.of(fileName,data),true);
+    }
+
+    @Override
+    public String upload(String folder, String fileName, byte[] data, boolean rename, boolean webp) {
+        return upload(folder,UploadFile.of(fileName,data,rename),webp);
     }
 
     @Override

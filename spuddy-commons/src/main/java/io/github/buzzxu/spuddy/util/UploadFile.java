@@ -49,8 +49,14 @@ public class UploadFile {
     public static UploadFile of(String fileName, InputStream file){
         return new UploadFile(fileName, file);
     }
+    public static UploadFile of(String fileName, InputStream file,boolean rename){
+        return new UploadFile(fileName, file,rename);
+    }
     public static UploadFile of(String fileName, byte[] content){
         return new UploadFile(fileName, content);
+    }
+    public static UploadFile of(String fileName, byte[] content,boolean rename){
+        return new UploadFile(fileName, content,rename);
     }
 
     public void rename(){
