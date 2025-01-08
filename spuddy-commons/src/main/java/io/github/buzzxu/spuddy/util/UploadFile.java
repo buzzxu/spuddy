@@ -20,7 +20,11 @@ public class UploadFile {
     private InputStream file;
     private byte[] content;
     private String extension;
+
     private UploadFile(String fileName, InputStream file) {
+        this(fileName,file,true);
+    }
+    private UploadFile(String fileName, InputStream file,boolean rename) {
         checkArgument(!Strings.isNullOrEmpty(fileName),"Null filename used");
         this.fileName = fileName;
         this.file = file;
@@ -28,12 +32,18 @@ public class UploadFile {
         rename();
     }
 
-    public UploadFile(String fileName, byte[] content) {
+    public UploadFile(String fileName, byte[] content){
+        this(fileName,content,true);
+    }
+    public UploadFile(String fileName, byte[] content,boolean rename) {
         checkArgument(!Strings.isNullOrEmpty(fileName),"Null filename used");
         this.fileName = fileName;
         this.content = content;
         fileExtension();
-        rename();
+        if(rename){
+            rename();
+        }
+
     }
 
     public static UploadFile of(String fileName, InputStream file){
