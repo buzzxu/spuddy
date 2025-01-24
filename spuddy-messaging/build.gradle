@@ -1,0 +1,4 @@
+dependencies {
+    api project(":spuddy-core")
+    api("org.springframework:spring-tx")
+}

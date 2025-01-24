@@ -4,7 +4,6 @@ package io.github.buzzxu.spuddy.test;
 import io.github.buzzxu.spuddy.Env;
 import io.github.buzzxu.spuddy.Stage;
 import io.github.buzzxu.spuddy.spring.AbstractSpringInitializer;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 

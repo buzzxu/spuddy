@@ -9,7 +9,7 @@ public enum Stage {
     DEFAULT(0,"default"),
     DEVEL(1,"devel"),
     TEST(2,"test"),
-    RELEASE(3,"release"),
+    PRODUCT(3,"product"),
     DOCKER(4,"docker"),
     UNIT_TEST(5,"unit-test"),
     ;
@@ -28,7 +28,7 @@ public enum Stage {
                 return val;
             }
         }
-        throw ApplicationException.raise("e.x.,stage=devel|default|test|release|docker|unit-test");
+        throw ApplicationException.raise("e.x.,stage=devel|default|test|product|docker|unit-test");
     }
 
     public boolean isDevTest(){

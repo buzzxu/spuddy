@@ -1,0 +1,4 @@
+dependencies {
+    api project(":spuddy-messaging")
+    api project(":spuddy-redis")
+}
