@@ -25,7 +25,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - run: gradle build
+      - run: gradle build -x test
       - run: echo "${{secrets.GPG_BASE64}}" > ~/.gradle/secring.gpg.base64
       - run: base64 -d ~/.gradle/secring.gpg.base64 > ~/.gradle/secring.gpg
       - run: gradle publishAllPublicationsToAliyunPackagesRepository -x test -PpublishToAliyun -Psigning.keyId=${{secrets.GPG_KEYID}} -Psigning.password=${{secrets.GPG_PASSWORD}} -Psigning.secretKeyRingFile=$(echo ~/.gradle/secring.gpg)
