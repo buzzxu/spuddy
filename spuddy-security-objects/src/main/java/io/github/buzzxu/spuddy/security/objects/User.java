@@ -94,6 +94,10 @@ public abstract class User extends Id<Long> implements Principal{
      * 是否已使命认证
      */
     protected boolean verified;
+    /**
+     * 自定义设置
+     */
+    protected Map<String,Object> settings;
     @JsonIgnore
     protected boolean mobileIsUserName;
     public User(Long id, boolean deleted, LocalDateTime createdAt, LocalDateTime updatedAt, String realName, String avatar, String userName, String nickName, String mobile, String email, String password, String salt, int status, boolean firstLogin, int type, int gender, int source, OAuthUser oAuthUser) {

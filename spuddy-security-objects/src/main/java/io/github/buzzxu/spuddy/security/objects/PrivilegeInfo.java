@@ -10,6 +10,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author xux
@@ -43,6 +44,8 @@ public class PrivilegeInfo implements Serializable {
     private final List<Integer> permIds = new ArrayList<>(2);
     private List<String> roles = new ArrayList<>(2);
     private List<String> permissions = new ArrayList<>(2);
+    @Setter
+    private Map<String,Object> settings;
     @Setter
     private int orgId;
 

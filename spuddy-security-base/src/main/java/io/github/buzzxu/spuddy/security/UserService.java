@@ -567,4 +567,12 @@ public interface UserService {
      * @return
      */
     Optional<PrivilegeInfo> pvgInfo(long userId);
+
+    /**
+     * 修改个人设置
+     * @param userId
+     * @param settings
+     * @return
+     */
+    boolean editSettings(long userId,Map<String,Object> settings);
 }

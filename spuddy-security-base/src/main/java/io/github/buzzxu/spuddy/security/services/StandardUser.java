@@ -8,6 +8,7 @@ import io.github.buzzxu.spuddy.errors.*;
 import io.github.buzzxu.spuddy.exceptions.ApplicationException;
 import io.github.buzzxu.spuddy.exceptions.RepeatException;
 import io.github.buzzxu.spuddy.i18n.I18n;
+import io.github.buzzxu.spuddy.jackson.Jackson;
 import io.github.buzzxu.spuddy.objects.Pair;
 import io.github.buzzxu.spuddy.objects.RealnameVerified;
 import io.github.buzzxu.spuddy.security.OAuthType;
@@ -682,7 +683,7 @@ public class StandardUser extends AbstractStandard implements UserService {
 
     private <U extends User> Optional<U> load(String where ,Object value,Class<U> clazz){
         try {
-            return qr.query("SELECT id,org_id,user_name,mobile,email,gender,status,password,salt,real_name,nick_name,avatar,source,firstlogin,type,merge,is_2fa AS use2FA,secret_2fa AS secret2FA,created_at,updated_at FROM t_user_base WHERE " + where + " AND deleted = false ", rs -> {
+            return qr.query("SELECT id,org_id,user_name,mobile,email,gender,status,password,salt,real_name,nick_name,avatar,source,firstlogin,type,merge,is_2fa AS use2FA,secret_2fa AS secret2FA,settings,created_at,updated_at FROM t_user_base WHERE " + where + " AND deleted = false ", rs -> {
                 try {
                     if (rs.next()) {
                         U val = clazz.getDeclaredConstructor().newInstance();
@@ -721,6 +722,7 @@ public class StandardUser extends AbstractStandard implements UserService {
         val.setMerge(rs.getBoolean("merge"));
         val.setUse2FA(rs.getBoolean("use2FA"));
         val.setSecret2FA(rs.getString("secret2FA"));
+        val.setSettings(Jackson.json2Map(rs.getString("settings")));
         val.setCreatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("created_at"))));
         val.setUpdatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("updated_at"))));
     }
@@ -1296,6 +1298,9 @@ public class StandardUser extends AbstractStandard implements UserService {
         if( !Strings.isNullOrEmpty(userInfo.getNickName()) && !StringUtils.equals(old.getNickName(),userInfo.getNickName())){
             params.put("nick_name",userInfo.getNickName());
         }
+        if(userInfo.getSettings() != null){
+            params.put("settings",Jackson.object2Json(userInfo.getSettings()));
+        }
         try {
             if(params.isEmpty()) {
                 return true;
@@ -1353,7 +1358,7 @@ public class StandardUser extends AbstractStandard implements UserService {
     public <U extends User> Optional<U> of(String oauthId, String unionid, OAuthType type, Class<U> clazz) {
         checkArgument(OAuthType.UNKNOWN != type ,"请确认三方平台");
         checkArgument(!Strings.isNullOrEmpty(oauthId) || !Strings.isNullOrEmpty(unionid),"请传入三方登录凭证");
-        String sql = "SELECT uo.id AS oId,uo.user_id,uo.type AS oType,uo.oauth_id,uo.unionid,uo.credential,uo.created_at AS createdAt,ub.id,ub.type,ub.user_name,ub.mobile,ub.email,ub.password,ub.salt,ub.nick_name,ub.real_name,ub.avatar,ub.status,ub.gender,ub.source,ub.firstlogin,ub.merge,ub.is_2fa AS use2FA,ub.secret_2fa AS secret2FA,ub.created_at,ub.updated_at  FROM t_user_base ub JOIN t_user_oauth uo ON ub.id = uo.user_id WHERE uo.type = ?  ";
+        String sql = "SELECT uo.id AS oId,uo.user_id,uo.type AS oType,uo.oauth_id,uo.unionid,uo.credential,uo.created_at AS createdAt,ub.id,ub.type,ub.user_name,ub.mobile,ub.email,ub.password,ub.salt,ub.nick_name,ub.real_name,ub.avatar,ub.status,ub.gender,ub.source,ub.firstlogin,ub.merge,ub.is_2fa AS use2FA,ub.secret_2fa AS secret2FA,ub.settings,ub.created_at,ub.updated_at  FROM t_user_base ub JOIN t_user_oauth uo ON ub.id = uo.user_id WHERE uo.type = ?  ";
         List<Object> params = Lists.newArrayListWithCapacity(3);
         params.add(type.type());
         if(!Strings.isNullOrEmpty(oauthId)){
@@ -1402,6 +1407,7 @@ public class StandardUser extends AbstractStandard implements UserService {
                     user.setMerge(rs.getBoolean("merge"));
                     user.setUse2FA(rs.getBoolean("use2FA"));
                     user.setSecret2FA(rs.getString("secret2FA"));
+                    user.setSettings(Jackson.json2Map(rs.getString("settings")));
                     user.setCreatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("created_at"))));
                     user.setUpdatedAt(asLocalDateTime(Instant.ofEpochSecond(rs.getLong("updated_at"))));
                     return Optional.of(user);
@@ -1586,6 +1592,7 @@ public class StandardUser extends AbstractStandard implements UserService {
                                     ub.real_name,
                                     ub.source,
                                     ub.avatar,
+                                    ub.settings,
                                     STRING_AGG(DISTINCT CAST(r.id AS VARCHAR), ',') AS roleIds,
                                     STRING_AGG(DISTINCT r.code, ',') AS roleCodes,
                                     STRING_AGG(DISTINCT CAST(p.id AS VARCHAR), ',') AS permIds,
@@ -1631,6 +1638,10 @@ public class StandardUser extends AbstractStandard implements UserService {
                     if(!Strings.isNullOrEmpty(permCodes)){
                         Splitter.on(",").split(permCodes).forEach(val::addPermissions);
                     }
+                    var settings = rs.getString("settings");
+                    if(!Strings.isNullOrEmpty(settings)){
+                        val.setSettings(Jackson.json2Map(settings));
+                    }
                     return Optional.of(val);
                 }
                 return Optional.empty();
@@ -1639,6 +1650,20 @@ public class StandardUser extends AbstractStandard implements UserService {
             throw ApplicationException.raise(e);
         }
     }
+
+    @Transactional
+    @Override
+    public boolean editSettings(long userId, Map<String, Object> settings) {
+        try {
+            if(settings == null){
+                return false;
+            }
+            return qr.update("UPDATE t_user_base SET settings = ?::json WHERE id = ?",Jackson.object2Json(settings),userId) > 0;
+        } catch (SQLException e) {
+            throw ApplicationException.raise(e);
+        }
+    }
+
     private boolean exist(String column, Object val){
         try {
             Long count = qr.query("SELECT COUNT(*) FROM t_user_base WHERE " + column + " =? AND deleted = false ", new ScalarHandler<>(1), val);
