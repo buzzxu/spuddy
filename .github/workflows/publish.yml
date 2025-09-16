@@ -12,6 +12,7 @@ env:
   MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
   ALIYUN_USERNAME: ${{ secrets.ALIYUN_USERNAME }}
   ALIYUN_PWD: ${{ secrets.ALIYUN_PWD }}
+  CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
 
 jobs:
   publish:
