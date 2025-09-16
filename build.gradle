@@ -27,7 +27,7 @@ plugins {
 }
 
 wrapper {
-    gradleVersion = '8.10'
+    gradleVersion = '8.11'
     distributionType = Wrapper.DistributionType.BIN
 }
 def buildTimeAndDate = OffsetDateTime.now()
@@ -411,6 +411,13 @@ subprojects { subProject->
                 credentials(PasswordCredentials) {
                     username  System.getenv("ALIYUN_USERNAME")
                     password  System.getenv("ALIYUN_PWD")
+                }
+
+                def cnbArtifactsGradlePassword = System.getenv('CNB_TOKEN')
+                url = 'https://maven.cnb.cool/fosuccs2025/ccs2025/-/packages/'
+                credentials {
+                    username = 'cnb'
+                    password = cnbArtifactsGradlePassword
                 }
                 /*name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/buzzxu/")
